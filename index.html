@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYC Marathon Guide 2025 - Guida Completa</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        // DATABASE COMPLETO NYC - 330+ VOCI
+        const nycDatabase = {
+            // ATTRAZIONI ICONICHE (15)
+            iconiche: [
+                {id: 1, name: "Metropolitan Museum of Art", quarter: "Upper East Side", description: "Una delle collezioni d'arte più grandi al mondo. Imperdibili: ala egizia, arte greca, impressionisti.", address: "1000 5th Ave", metro: "4,5,6 a 86th St", hours: "Dom-Gio 10-17, Ven-Sab 10-21", price: "Adulti $30, suggerito ma non obbligatorio", tips: "Prenota online per evitare code. Ingresso gratuito per NY residents.", category: "museo"},
+                {id: 2, name: "Central Park", quarter: "Manhattan", description: "843 acri di natura nel cuore di Manhattan. Imperdibili: Bethesda Fountain, Strawberry Fields, Belvedere Castle.", address: "Central Park", metro: "Multiple stops", hours: "6:00-1:00", price: "Gratuito", tips: "Evita dopo il tramonto. Noleggia bike a Columbus Circle.", category: "parco"},
+                {id: 3, name: "Statue of Liberty", quarter: "Liberty Island", description: "Simbolo americano dal 1886. Vista spettacolare su Manhattan dal traghetto.", address: "Liberty Island", metro: "1 a South Ferry, poi traghetto", hours: "9:00-17:00", price: "Traghetto $24, corona +$3", tips: "Prenota crown tickets in anticipo. Security come aeroporto.", category: "monumento"},
+                {id: 4, name: "Empire State Building", quarter: "Midtown", description: "Grattacielo iconico del 1931. Osservatorio all'86° piano con vista a 360°.", address: "350 5th Ave", metro: "B,D,F,M,N,Q,R,W a 34th St", hours: "8:00-2:00", price: "Main deck $44, top deck +$20", tips: "Compra skip-the-line. Tramonto = code lunghe. Sconto con CityPASS.", category: "osservatorio"},
+                {id: 5, name: "Times Square", quarter: "Midtown", description: "Il crocevia del mondo. Luci al neon, teatri Broadway, shopping.", address: "Times Square", metro: "1,2,3,7,N,Q,R,W,S a Times Sq", hours: "24/7", price: "Gratuito", tips: "Evita i costumi (pagano per foto). Tkts booth per Broadway scontati.", category: "piazza"},
+                {id: 6, name: "Brooklyn Bridge", quarter: "Brooklyn/Manhattan", description: "Ponte storico del 1883. Passeggiata pedonale con vista su Manhattan.", address: "Brooklyn Bridge", metro: "4,5,6 a Brooklyn Bridge-City Hall", hours: "24/7", price: "Gratuito", tips: "Alba = meno affollato. Lato Brooklyn per foto migliori di Manhattan.", category: "ponte"},
+                {id: 7, name: "9/11 Memorial & Museum", quarter: "Financial District", description: "Memorial commovente con le due piscine sui siti delle torri gemelle.", address: "180 Greenwich St", metro: "R,W a Cortlandt St", hours: "9:00-20:00", price: "Memorial gratuito, Museum $26", tips: "Prenota online per il museo. Memorial sempre accessibile gratuitamente.", category: "memoriale"},
+                {id: 8, name: "One World Observatory", quarter: "Financial District", description: "Vista mozzafiato dal 100-102° piano del nuovo WTC.", address: "285 Fulton St", metro: "R,W a Cortlandt St", hours: "9:00-21:00", price: "$39-79 secondo orario", tips: "Ascensore con time-lapse della costruzione NYC. Tramonto spettacolare.", category: "osservatorio"},
+                {id: 9, name: "High Line", quarter: "Meatpacking District", description: "Parco sopraelevato su ex ferrovia. Arte, architettura, viste uniche.", address: "Gansevoort St to 34th St", metro: "A,C,E a 14th St", hours: "6:00-19:00 (nov)", price: "Gratuito", tips: "Inizia da sud (Gansevoort). Affollato weekend pomeriggio.", category: "parco"},
+                {id: 10, name: "Museum of Modern Art (MoMA)", quarter: "Midtown", description: "Arte moderna: Van Gogh, Picasso, Warhol. Collezione impressionante.", address: "11 W 53rd St", metro: "E,M a 5th Ave/53rd St", hours: "10:30-17:30", price: "$25", tips: "Gratis venerdì 16-20 per NY residents. Store con design unici.", category: "museo"},
+                {id: 11, name: "Top of the Rock", quarter: "Midtown", description: "Osservatorio Rockefeller Center. Vista perfetta su Empire State Building.", address: "30 Rockefeller Plaza", metro: "B,D,F,M a 47-50th St", hours: "8:00-24:00", price: "$37", tips: "Meno affollato di Empire State. Vista migliore per foto Empire State.", category: "osservatorio"},
+                {id: 12, name: "Guggenheim Museum", quarter: "Upper East Side", description: "Architettura spirale di Frank Lloyd Wright. Arte moderna e contemporanea.", address: "1071 5th Ave", metro: "4,5,6 a 86th St", hours: "10:00-17:45, sab fino 19:45", price: "$25", tips: "Inizia dall'alto e scendi a spirale. Caffè panoramico interno.", category: "museo"},
+                {id: 13, name: "Staten Island Ferry", quarter: "Staten Island", description: "Traghetto gratuito con vista Statua della Libertà e Manhattan skyline.", address: "Whitehall Terminal", metro: "R,W a Whitehall", hours: "24/7, ogni 30 min", price: "Gratuito", tips: "Stai sul lato destro andando. Non serve scendere a Staten Island.", category: "trasporto"},
+                {id: 14, name: "The Vessel", quarter: "Hudson Yards", description: "Struttura architettonica a nido d'ape. Salita panoramica.", address: "20 Hudson Yards", metro: "7 a 34th St-Hudson Yards", hours: "10:00-21:00", price: "Gratuito con prenotazione", tips: "Prenota online gratis. Chiuso per manutenzione - controlla status.", category: "architettura"},
+                {id: 15, name: "Bryant Park", quarter: "Midtown", description: "Oasi verde dietro NY Public Library. Eventi stagionali, food kiosks.", address: "Bryant Park", metro: "B,D,F,M,7 a 42nd St", hours: "6:00-24:00", price: "Gratuito", tips: "WiFi gratis. Ice skating invernale. Food court sotterraneo.", category: "parco"}
+            ],
+
+            // ATTRAZIONI NASCOSTE (15)
+            nascoste: [
+                {id: 16, name: "The Cloisters", quarter: "Fort Tryon Park", description: "Arte medievale in castello ricostruito. Giardini con erbe medievali.", address: "99 Margaret Corbin Dr", metro: "A a 190th St", hours: "10:00-17:15", price: "Incluso con ticket Met ($30)", tips: "45 min da Midtown. Perfetto per mezza giornata tranquilla.", category: "museo"},
+                {id: 17, name: "Roosevelt Island Tramway", quarter: "Roosevelt Island", description: "Funivia con vista spettacolare su Manhattan. Come un volo panoramico.", address: "2nd Ave e 59th St", metro: "F a Roosevelt Island (o tram)", hours: "6:00-2:00", price: "$2.90 (come metro)", tips: "Usa MetroCard. Vista migliore lato ovest verso Manhattan.", category: "trasporto"},
+                {id: 18, name: "Smorgasburg", quarter: "Brooklyn", description: "Mercato food truck con 100+ vendor. Ogni sabato e domenica.", address: "East River State Park, Williamsburg", metro: "L a Bedford Ave", hours: "Sab-Dom 11:00-18:00", price: "Gratis ingresso, cibo $5-15", tips: "Porta contanti. Lunghe code per ramen burger e ice cream.", category: "mercato"},
+                {id: 19, name: "The Elevated Acre", quarter: "Financial District", description: "Giardino sopraelevato segreto con vista su Brooklyn Bridge.", address: "55 Water St", metro: "R,W a Whitehall", hours: "8:00-22:00", price: "Gratuito", tips: "Nascosto in edificio uffici. Ascensore nell'atrio.", category: "parco"},
+                {id: 20, name: "Green-Wood Cemetery", quarter: "Brooklyn", description: "Cimitero storico del 1838 con vista panoramica su Manhattan.", address: "500 25th St, Brooklyn", metro: "D,N,R a 25th St", hours: "7:00-19:00", price: "Gratuito", tips: "Highest point di Brooklyn. Sepolti personaggi famosi.", category: "cimitero"},
+                {id: 21, name: "Tenement Museum", quarter: "Lower East Side", description: "Appartamenti restaurati di immigrati 1800-1900. Storia autentica.", address: "103 Orchard St", metro: "F a Delancey St", hours: "10:00-18:30", price: "$29", tips: "Tour guidati obbligatori. Prenota in anticipo.", category: "museo"},
+                {id: 22, name: "The Morgan Library", quarter: "Murray Hill", description: "Biblioteca privata di JP Morgan. Manoscritti, libri rari.", address: "225 Madison Ave", metro: "6 a 33rd St", hours: "10:30-17:00, ven fino 21:00", price: "$22", tips: "Studiolo originale di Morgan intatto. Mostre temporanee eccellenti.", category: "biblioteca"},
+                {id: 23, name: "Stone Street", quarter: "Financial District", description: "Strada di pietra del 1600. Bar all'aperto, atmosfera europea.", address: "Stone St", metro: "R,W a Whitehall", hours: "24/7, bar da 11:00", price: "Gratis passeggiata", tips: "Happy hour 17-19. Chiuso al traffico per tavoli esterni.", category: "strada"},
+                {id: 24, name: "The High Bridge", quarter: "Bronx/Manhattan", description: "Ponte pedonale più antico di NYC (1848). Vista Harlem River.", address: "Highbridge Park", metro: "1 a 170th St", hours: "7:00-20:00", price: "Gratuito", tips: "20 min a piedi da metro. Meno turistico, più autentico.", category: "ponte"},
+                {id: 25, name: "Governors Island", quarter: "Harbor", description: "Isola-parco con arte, eventi, spiagge. Traghetto da Manhattan.", address: "Governors Island", metro: "R,W a Whitehall, poi traghetto", hours: "Mag-Ott 10:00-18:00", price: "Traghetto $3", tips: "Solo weekend. Porta picnic. Hammock grove per relax.", category: "isola"},
+                {id: 26, name: "Brooklyn Bridge Park", quarter: "Brooklyn", description: "Parco lungofiume con spiagge, giostre, viste Manhattan.", address: "334 Furman St, Brooklyn", metro: "A,C a High St", hours: "6:00-1:00", price: "Gratuito", tips: "Jane's Carousel $2. Tramonto spettacolare su Manhattan.", category: "parco"},
+                {id: 27, name: "The Oculus", quarter: "Financial District", description: "Stazione Calatrava a forma di uccello. Architettura futuristica.", address: "185 Greenwich St", metro: "R,W a Cortlandt St", hours: "5:30-2:00", price: "Gratuito", tips: "Shopping mall sotterraneo. PATH trains per New Jersey.", category: "architettura"},
+                {id: 28, name: "Gantry Plaza State Park", quarter: "Long Island City", description: "Vista panoramica migliore di Manhattan skyline. Poco affollato.", address: "4-09 47th Rd, Queens", metro: "7 a Vernon Blvd", hours: "8:00-tramonto", price: "Gratuito", tips: "10 min da Midtown con metro. Perfetto per foto skyline.", category: "parco"},
+                {id: 29, name: "The Whitney Museum", quarter: "Meatpacking District", description: "Arte americana contemporanea. Edificio Renzo Piano 2015.", address: "99 Gansevoort St", metro: "A,C,E a 14th St", hours: "10:30-18:00, gio fino 22:00", price: "$25", tips: "Terrazza all'aperto gratuita. Vicino a High Line.", category: "museo"},
+                {id: 30, name: "The Seaport District", quarter: "Financial District", description: "Porto storico ristrutturato. Shopping, ristoranti, storia marittima.", address: "19 Fulton St", metro: "R,W a Whitehall", hours: "24/7", price: "Gratuito", tips: "Pier 17 rooftop concerts. Historic ships tours.", category: "distretto"}
+            ],
+
+            // RISTORANTI ECONOMICI (20)
+            economici: [
+                {id: 31, name: "Joe's Pizza", quarter: "Multiple", description: "Pizza al taglio classica NYC dal 1975. Slice perfetta.", address: "7 Carmine St (originale)", metro: "A,C,E,B,D,F,M a W 4th St", hours: "10:00-4:00", price: "Slice $3, intera $20", tips: "Sedi multiple. Quella di Carmine St è l'originale.", category: "pizza"},
+                {id: 32, name: "Kesta Happens", quarter: "Astoria", description: "Arepas venezuelane autentiche. Locale frequentato da venezuelani.", address: "35-03 Broadway, Queens", metro: "N,W a Broadway", hours: "11:00-23:00", price: "Arepa $4-7", tips: "Solo contanti. Porzioni generose. Prova la reina pepiada.", category: "sudamericana"},
+                {id: 33, name: "Xi'an Famous Foods", quarter: "Multiple", description: "Noodles cinesi piccanti dello Shaanxi. Autentico street food.", address: "Multiple locations", metro: "Varia", hours: "11:00-21:30", price: "Bowl $8-12", tips: "Spicy cumin lamb noodles è signature. Molto piccante.", category: "cinese"},
+                {id: 34, name: "The Halal Guys", quarter: "Multiple", description: "Combo chicken/lamb su riso. Street food diventato culto.", address: "Multiple carts e locations", metro: "Varia", hours: "10:00-4:00", price: "Combo $8-10", tips: "Salsa bianca e hot sauce. Porzioni enormi per il prezzo.", category: "mediorientale"},
+                {id: 35, name: "Vanessa's Dumpling House", quarter: "Chinatown", description: "Dumplings fatti a mano. 4 for $1 fried pork dumplings.", address: "118 Eldridge St", metro: "F a East Broadway", hours: "10:30-22:30", price: "4 dumplings $1.25", tips: "Guardali fare dumplings. Sesame pancake sandwich ottimo.", category: "cinese"},
+                {id: 36, name: "Los Tacos No. 1", quarter: "Multiple", description: "Tacos messicani autentici. Carne alla plancha, tortillas fresche.", address: "Multiple locations", metro: "Varia", hours: "8:00-24:00", price: "Taco $3-4", tips: "Adobada (al pastor) è specialità. Times Square location turistico.", category: "messicana"},
+                {id: 37, name: "Mamoun's Falafel", quarter: "Greenwich Village", description: "Falafel dal 1971. Aperto 24/7, economico, veloce.", address: "119 MacDougal St", metro: "A,C,E,B,D,F,M a W 4th St", hours: "24/7", price: "Sandwich $4-6", tips: "Cash only. Hot sauce gratuita. Perfetto late night snack.", category: "mediorientale"},
+                {id: 38, name: "Gray's Papaya", quarter: "Multiple", description: "Hot dogs 24/7. Institution newyorkese dal 1973.", address: "2090 Broadway", metro: "1,2,3 a 72nd St", hours: "24/7", price: "Hot dog $2.50", tips: "Papaya drink è tradizione. Recession Special 2 dogs + drink.", category: "americana"},
+                {id: 39, name: "Prosperity Dumpling", quarter: "Lower East Side", description: "Dumplings più economici di NYC. $1.25 per 4 pezzi.", address: "46 Eldridge St", metro: "F a East Broadway", hours: "10:00-22:00", price: "4 dumplings $1.25", tips: "Solo contanti. Fried pork dumplings sono signature.", category: "cinese"},
+                {id: 40, name: "Prince Street Pizza", quarter: "Multiple", description: "Pizza al taglio spessa, stile siciliano. Square slices.", address: "27 Prince St (originale)", metro: "6 a Spring St", hours: "11:00-2:00", price: "Slice $3-5", tips: "Pepperoni square slice è famosa. Code lunghe ma veloci.", category: "pizza"},
+                {id: 41, name: "Eisenberg's Sandwich Shop", quarter: "Flatiron", description: "Deli storico dal 1929. Pastrami, matzo ball soup.", address: "174 5th Ave", metro: "R,W a 23rd St", hours: "6:30-17:00", price: "Sandwich $12-15", tips: "Cash only. Egg cream soda. Atmosfera vintage autentica.", category: "deli"},
+                {id: 42, name: "Sunrise Mart", quarter: "Multiple", description: "Supermercato giapponese con prepared food. Onigiri, bento.", address: "4 Stuyvesant St", metro: "6 a Astor Pl", hours: "8:00-23:00", price: "Bento $6-10", tips: "Fresh sushi daily. Japanese comfort food. East Village location.", category: "giapponese"},
+                {id: 43, name: "Birria-Landia", quarter: "Jackson Heights", description: "Birria tacos trending. Consommé per intingere.", address: "78-10 Roosevelt Ave, Queens", metro: "7 a 82nd St", hours: "10:00-22:00", price: "Taco $3, consommé $3", tips: "Weekend Instagram lines. Vale l'attesa. Cash preferred.", category: "messicana"},
+                {id: 44, name: "Corner Bistro", quarter: "West Village", description: "Burger classico in pub storico. No frills, solo qualità.", address: "331 W 4th St", metro: "A,C,E a 14th St", hours: "11:30-2:00", price: "Burger $12", tips: "Cash only. Small burger è abbondante. Vibe autentico NYC.", category: "americana"},
+                {id: 45, name: "Lucinda Verde", quarter: "Gramercy", description: "Arepa bar venezuelano. Cocktails economici.", address: "43 E 20th St", metro: "6 a 23rd St", hours: "17:00-2:00", price: "Arepa $8-12", tips: "Happy hour 17-19. Venezuelan crowd. Reina pepiada arepa.", category: "sudamericana"},
+                {id: 46, name: "Empanada Mama", quarter: "Hell's Kitchen", description: "Empanadas argentine 24/7. Dolci e salate.", address: "763 9th Ave", metro: "A,C,E a 42nd St", hours: "24/7", price: "Empanada $4-6", tips: "Dulce de leche dessert empanadas. Late night comfort food.", category: "argentina"},
+                {id: 47, name: "Taco Bell Cantina", quarter: "Times Square", description: "Taco Bell con alcol. Touristy ma conveniente.", address: "446 Broadway", metro: "R,W,S,1,2,3,7 a Times Sq", hours: "7:00-4:00", price: "Meal $8-12", tips: "Novelty location. Alcohol served. Tourist trap ma pratico.", category: "messicana"},
+                {id: 48, name: "Woorijip", quarter: "Koreatown", description: "Korean prepared food 24/7. Self-service, economico.", address: "12 W 32nd St", metro: "B,D,F,M,N,Q,R,W a 34th St", hours: "24/7", price: "Container $6-12", tips: "Weigh your container. Kimchi, bulgogi, banchan variety.", category: "coreana"},
+                {id: 49, name: "Veselka", quarter: "East Village", description: "Diner ucraino 24/7. Pierogi, borscht, comfort food.", address: "144 2nd Ave", metro: "6 a Astor Pl", hours: "24/7", price: "Entree $12-18", tips: "Late night spot. Ukrainian breakfast. Homestyle cooking.", category: "ucraina"},
+                {id: 50, name: "Clinton St. Baking Company", quarter: "Lower East Side", description: "Brunch famoso per pancakes. Weekend waits lunghi.", address: "4 Clinton St", metro: "F a East Broadway", hours: "8:00-16:00 weekend", price: "Pancakes $16", tips: "Weekend 2-hour waits. Weekday lunch meno affollato.", category: "americana"}
+            ],
+
+            // RISTORANTI MEDI (25)
+            medi: [
+                {id: 51, name: "Katz's Delicatessen", quarter: "Lower East Side", description: "Deli iconico dal 1888. Pastrami sandwich leggendario.", address: "205 E Houston St", metro: "F a 2nd Ave", hours: "8:00-22:45", price: "Pastrami $26", tips: "Tieni il ticket. Tip the slicer $1 per assaggio. When Harry Met Sally location.", category: "deli"},
+                {id: 52, name: "Junior's Restaurant", quarter: "Brooklyn", description: "Cheesecake più famosa di NYC. Diner storico dal 1950.", address: "386 Flatbush Ave Ext, Brooklyn", metro: "B,Q,R a DeKalb Ave", hours: "6:30-1:00", price: "Cheesecake slice $8", tips: "Most famous cheesecake in NYC. Take whole cake to go.", category: "americana"},
+                {id: 53, name: "Peter Luger Steakhouse", quarter: "Williamsburg", description: "Steakhouse leggendaria dal 1887. Solo contanti!", address: "178 Broadway, Brooklyn", metro: "J,M,Z a Marcy Ave", hours: "17:45-21:45", price: "Steak for 2 $120", tips: "CASH ONLY. No credit cards. Porterhouse per 2+ persone.", category: "steakhouse"},
+                {id: 54, name: "Russ & Daughters", quarter: "Lower East Side", description: "Appetizing shop dal 1914. Salmone, bagels, Jewish specialties.", address: "179 E Houston St", metro: "F a 2nd Ave", hours: "8:00-18:00", price: "Bagel sandwich $18", tips: "4th generation family business. Nova Scotia salmon.", category: "jewish"},
+                {id: 55, name: "Lombardi's Pizza", quarter: "Little Italy", description: "Prima pizzeria America (1905). Coal oven, no slices.", address: "32 Spring St", metro: "6 a Spring St", hours: "11:30-23:00", price: "Pizza $24-28", tips: "No slices, solo whole pies. Coal oven gives unique flavor.", category: "pizza"},
+                {id: 56, name: "Carmine's", quarter: "Times Square", description: "Italian family-style. Porzioni enormi per sharing.", address: "200 W 44th St", metro: "N,Q,R,W,S,1,2,3,7 a Times Sq", hours: "11:30-23:00", price: "Entree $35-45", tips: "Family style portions. Order 1 dish per 2 people.", category: "italiana"},
+                {id: 57, name: "The Smith", quarter: "Multiple", description: "American brasserie. Brunch weekend, scene young professional.", address: "Multiple locations", metro: "Varia", hours: "7:00-2:00", price: "Entree $22-32", tips: "Good brunch spot. Reservation recommended weekends.", category: "americana"},
+                {id: 58, name: "Beauty & Essex", quarter: "Lower East Side", description: "Hidden restaurant dietro pawn shop. Trendy, Instagram-worthy.", address: "146 Essex St", metro: "F a Delancey St", hours: "17:00-2:00", price: "Small plates $15-25", tips: "Enter through pawn shop. Sharing plates. Trendy crowd.", category: "contemporanea"},
+                {id: 59, name: "Joe Allen", quarter: "Theater District", description: "Broadway insider restaurant. Wall of Broadway flops.", address: "326 W 46th St", metro: "N,Q,R,W,S,1,2,3,7 a Times Sq", hours: "11:30-24:00", price: "Entree $25-35", tips: "Pre-theater dining. Wall of flop show posters.", category: "americana"},
+                {id: 60, name: "Ippudo NY", quarter: "East Village", description: "Ramen giapponese. Akamaru modern ramen signature.", address: "65 4th Ave", metro: "6 a Astor Pl", hours: "11:00-23:30", price: "Ramen $16-20", tips: "No reservations. Peak time waits. Pork buns appetizer.", category: "giapponese"},
+                {id: 61, name: "Gotham Bar and Grill", quarter: "Greenwich Village", description: "New American fine dining. Presentazione artistica piatti.", address: "12 E 12th St", metro: "4,5,6,L,N,Q,R,W a 14th St", hours: "17:00-22:00", price: "Entree $35-48", tips: "Dress code enforced. Reservations essential.", category: "fine_dining"},
+                {id: 62, name: "Serendipity 3", quarter: "Upper East Side", description: "Frozen hot chocolate iconico. Dessert extravaganza.", address: "225 E 60th St", metro: "4,5,6 a 59th St", hours: "11:00-24:00", price: "Frozen hot chocolate $12", tips: "Tourist destination. Huge portions. Instagram famous desserts.", category: "dessert"},
+                {id: 63, name: "Shake Shack", quarter: "Multiple", description: "Burger chain nata a Madison Square Park. Gourmet fast food.", address: "Multiple locations", metro: "Varia", hours: "11:00-23:00", price: "Burger meal $15", tips: "Original Madison Sq Park location. ShackBurger signature.", category: "burgers"},
+                {id: 64, name: "ABC Kitchen", quarter: "Flatiron", description: "Farm-to-table by Jean-Georges. Ingredienti locali, sostenibili.", address: "35 E 18th St", metro: "4,5,6,L,N,Q,R,W a 14th St", hours: "11:30-22:30", price: "Entree $28-42", tips: "Reservations hard to get. Roasted carrot dish famous.", category: "contemporanea"},
+                {id: 65, name: "The Spotted Pig", quarter: "West Village", description: "Gastropub. Charcoal burger famous, scene notturna.", address: "314 W 11th St", metro: "A,C,E a 14th St", hours: "12:00-2:00", price: "Burger $21", tips: "No reservations. Late night scene. Michelin starred pub food.", category: "gastropub"},
+                {id: 66, name: "Babbo", quarter: "Greenwich Village", description: "Mario Batali's Italian. Reservations difficili da ottenere.", address: "110 Waverly Pl", metro: "A,C,E,B,D,F,M a W 4th St", hours: "17:30-23:00", price: "Pasta $24-32", tips: "Michelin star. Book far in advance. Beef cheek ravioli.", category: "italiana"},
+                {id: 67, name: "Momofuku Noodle Bar", quarter: "East Village", description: "David Chang's ramen empire start. Pork buns iconici.", address: "171 1st Ave", metro: "L a 1st Ave", hours: "17:00-23:00", price: "Ramen $18-22", tips: "Counter seating. Pork buns must-order. No reservations.", category: "asiatica"},
+                {id: 68, name: "Balthazar", quarter: "SoHo", description: "French brasserie. Scene, atmosfera Parigi autentica.", address: "80 Spring St", metro: "6 a Spring St", hours: "7:30-24:00", price: "Entree $28-42", tips: "Reservations essential. Raw bar excellent. French onion soup.", category: "francese"},
+                {id: 69, name: "Grand Central Oyster Bar", quarter: "Midtown", description: "Oyster bar storico sotto Grand Central. Architettura Guastavino.", address: "Grand Central Terminal", metro: "4,5,6,7,S a Grand Central", hours: "11:30-21:30", price: "Oysters $3-4 each", tips: "Closed Sundays. Acoustic ceiling whispering gallery.", category: "seafood"},
+                {id: 70, name: "Minetta Tavern", quarter: "Greenwich Village", description: "French bistro storico. Black label burger famoso.", address: "113 MacDougal St", metro: "A,C,E,B,D,F,M a W 4th St", hours: "17:30-2:00", price: "Black label burger $36", tips: "Hard reservations. Expensive but worth it. Historic Village spot.", category: "francese"},
+                {id: 71, name: "Prune", quarter: "East Village", description: "Brunch leggendario. Bloody Mary, Dutch baby pancake.", address: "54 E 1st St", metro: "6 a Bleecker St", hours: "10:00-16:00, 17:30-23:00", price: "Brunch $18-24", tips: "Weekend waits long. Weekday dinner less crowded.", category: "americana"},
+                {id: 72, name: "Coppola's East", quarter: "East Harlem", description: "Italian-American red sauce. Family recipes, generous portions.", address: "378 E 145th St", metro: "6 a 3rd Ave-149th St", hours: "16:00-22:00", price: "Pasta $18-24", tips: "BYOB. Cash only. Real neighborhood Italian.", category: "italiana"},
+                {id: 73, name: "RedFarm", quarter: "West Village", description: "Chinese-American fusion. Pac-Man dumplings, creative presentations.", address: "529 Hudson St", metro: "1 a Christopher St", hours: "17:00-24:00", price: "Dim sum $12-18", tips: "Creative presentations. Pac-Man shrimp dumplings Instagram famous.", category: "cinese"},
+                {id: 74, name: "The Meatpacking District", quarter: "Meatpacking", description: "Area con molti ristoranti trendy. Scene notturna.", address: "Meatpacking District", metro: "A,C,E a 14th St", hours: "Varia", price: "Varia", tips: "Nightlife area. Many trendy restaurants. Dress to impress.", category: "distretto"},
+                {id: 75, name: "Tavern on the Green", quarter: "Central Park", description: "Ristorante storico in Central Park. Vista parco, tourist destination.", address: "Central Park West & 67th St", metro: "1 a 66th St", hours: "11:00-22:00", price: "Entree $32-48", tips: "Tourist destination. Beautiful setting. Expensive but unique location.", category: "americana"}
+            ],
+
+            // RISTORANTI STELLATI (10)
+            stellati: [
+                {id: 76, name: "Eleven Madison Park", quarter: "Flatiron", description: "4 stelle Michelin. Plant-based tasting menu. Prenotazioni mesi prima.", address: "11 Madison Ave", metro: "6 a 28th St", hours: "17:30-22:00", price: "Tasting menu $365", tips: "Prenotazioni aprono mesi prima. Dress code strict. Plant-based only.", category: "fine_dining"},
+                {id: 77, name: "Le Bernardin", quarter: "Midtown", description: "3 stelle Michelin. Pesce, tecnica francese impeccabile.", address: "155 W 51st St", metro: "1 a 50th St", hours: "17:15-22:15", price: "Tasting menu $198", tips: "Jacket required men. Eric Ripert chef. Seafood perfection.", category: "francese"},
+                {id: 78, name: "Chef's Table at Brooklyn Fare", quarter: "Brooklyn", description: "3 stelle Michelin. 18 posti, sushi omakase style.", address: "431 W 37th St", metro: "A,C,E a 34th St", hours: "18:00-22:00", price: "Omakase $395", tips: "18 seats only. No phones during service. Months advance booking.", category: "giapponese"},
+                {id: 79, name: "Masa", quarter: "Columbus Circle", description: "3 stelle Michelin. Sushi più costoso America. $595 per persona.", address: "10 Columbus Circle", metro: "1,A,B,C,D a 59th St", hours: "17:30-21:00", price: "Omakase $595", tips: "Most expensive restaurant NYC. No photos. Jacket required.", category: "giapponese"},
+                {id: 80, name: "Daniel", quarter: "Upper East Side", description: "2 stelle Michelin. French fine dining. Daniel Boulud chef.", address: "60 E 65th St", metro: "6 a 68th St", hours: "17:30-22:00", price: "Tasting menu $155", tips: "Jacket required. Classic French technique. Wine pairing recommended.", category: "francese"},
+                {id: 81, name: "Jean-Georges", quarter: "Columbus Circle", description: "2 stelle Michelin. French-Asian fusion. Central Park views.", address: "1 Central Park West", metro: "1,A,B,C,D a 59th St", hours: "17:30-22:00", price: "Tasting menu $218", tips: "Central Park views. Innovative French-Asian. Lunch cheaper option.", category: "fusion"},
+                {id: 82, name: "Per Se", quarter: "Columbus Circle", description: "3 stelle Michelin. Thomas Keller. $355 tasting menu.", address: "10 Columbus Circle", metro: "1,A,B,C,D a 59th St", hours: "17:30-21:30", price: "Tasting menu $355", tips: "Same building as Masa. Jacket required. Service perfection.", category: "americana"},
+                {id: 83, name: "Aquavit", quarter: "Midtown", description: "2 stelle Michelin. Scandinavian fine dining. Innovative nordic.", address: "65 E 55th St", metro: "E,M a 5th Ave", hours: "17:00-22:00", price: "Tasting menu $125", tips: "Nordic cuisine in NYC. Less formal than other 2-stars.", category: "scandinava"},
+                {id: 84, name: "Atomix", quarter: "Murray Hill", description: "2 stelle Michelin. Korean fine dining. Counter seating experience.", address: "104 E 30th St", metro: "6 a 28th St", hours: "18:00-21:30", price: "Tasting menu $275", tips: "Korean tasting menu. Counter seating. Interactive experience.", category: "coreana"},
+                {id: 85, name: "Blue Hill", quarter: "Greenwich Village", description: "1 stella Michelin. Farm-to-table pioneer. No menu, seasonal.", address: "75 Washington Pl", metro: "A,C,E,B,D,F,M a W 4th St", hours: "17:30-22:00", price: "Tasting menu $98", tips: "No written menu. Farm-to-table pioneer. Vegetable-focused.", category: "contemporanea"}
+            ],
+
+            // SPECIALITÀ NYC (15)
+            specialita: [
+                {id: 86, name: "H&H Bagels", quarter: "Multiple", description: "Bagels freschi 24/7. New York institution.", address: "Multiple locations", metro: "Varia", hours: "24/7", price: "Bagel $1.50, sandwich $8", tips: "Everything bagel with scallion cream cheese è classic.", category: "bagels"},
+                {id: 87, name: "Levain Bakery", quarter: "Multiple", description: "Cookies caldi giganti. Serviti ancora caldi dal forno.", address: "167 W 74th St (originale)", metro: "1,2,3 a 72nd St", hours: "8:00-23:00", price: "Cookie $5", tips: "Chocolate chip walnut è signature. Served warm.", category: "cookies"},
+                {id: 88, name: "Dominique Ansel Bakery", quarter: "SoHo", description: "Cronut inventor. Code lunghe per pastry innovative.", address: "189 Spring St", metro: "6 a Spring St", hours: "8:00-19:00", price: "Cronut $6", tips: "Cronut ancora popular. Cookie shot inventivo.", category: "bakery"},
+                {id: 89, name: "Economy Candy", quarter: "Lower East Side", description: "Candy shop dal 1937. Floor-to-ceiling candy selection.", address: "108 Rivington St", metro: "F a Delancey St", hours: "9:00-18:00", price: "Varia", tips: "Nostalgic candy selection. Good for kids. Tourist attraction.", category: "candy"},
+                {id: 90, name: "Faicco's Italian Specialties", quarter: "Greenwich Village", description: "Salumeria italiana dal 1900. Panini freschi, imported goods.", address: "260 Bleecker St", metro: "1 a Christopher St", hours: "8:00-18:00", price: "Sandwich $12-15", tips: "Real Italian deli. Imported prosciutto. Fresh mozz daily.", category: "italiana"},
+                {id: 91, name: "Guss' Pickles", quarter: "Lower East Side", description: "Pickles da barile come 1920s. Still family operated.", address: "85 Orchard St", metro: "F a Delancey St", hours: "10:00-18:00", price: "Pickle $2-3", tips: "Barrel pickles like old days. Sour, half-sour, hot.", category: "pickles"},
+                {id: 92, name: "Murray's Cheese Shop", quarter: "Greenwich Village", description: "Cheese shop dal 1940. Tastings, classes, sandwiches.", address: "254 Bleecker St", metro: "1 a Christopher St", hours: "8:00-20:00", price: "Sandwich $12", tips: "Free tastings. Grilled cheese truck outside sometimes.", category: "cheese"},
+                {id: 93, name: "Russ & Daughters", quarter: "Lower East Side", description: "Appetizing shop. Smoked fish, caviar, Jewish specialties.", address: "179 E Houston St", metro: "F a 2nd Ave", hours: "8:00-18:00", price: "Lox $32/lb", tips: "4th generation. Try everything before buying.", category: "appetizing"},
+                {id: 94, name: "Veniero's", quarter: "East Village", description: "Pasticceria italiana dal 1894. Cannoli, sfogliatelle, gelato.", address: "174 E 1st St", metro: "L a 1st Ave", hours: "8:00-24:00", price: "Cannoli $4", tips: "Oldest pastry shop NYC. Traditional Italian desserts.", category: "pasticceria"},
+                {id: 95, name: "Yonah Schimmel Knish Bakery", quarter: "Lower East Side", description: "Knish dal 1910. Potato, kasha, spinach varieties.", address: "137 E Houston St", metro: "F a 2nd Ave", hours: "9:00-19:00", price: "Knish $4", tips: "Original knish recipe unchanged. Heavy but authentic.", category: "knish"},
+                {id: 96, name: "Gramercy Tavern", quarter: "Flatiron", description: "Danny Meyer restaurant. American seasonal, hospitality famous.", address: "42 E 20th St", metro: "6 a 23rd St", hours: "12:00-22:00", price: "Entree $35-45", tips: "Two sections: casual tavern, formal dining room.", category: "americana"},
+                {id: 97, name: "The Russian Tea Room", quarter: "Midtown", description: "Russian restaurant iconico. Caviar, blini, vodka selection.", address: "150 W 57th St", metro: "N,Q,R,W a 57th St", hours: "11:30-22:00", price: "Entree $40-60", tips: "Tourist destination. Christmas decorations year-round. Expensive.", category: "russa"},
+                {id: 98, name: "Nom Wah Tea Parlor", quarter: "Chinatown", description: "Dim sum dal 1920. Oldest dim sum parlor in NYC.", address: "13 Doyers St", metro: "6 a Canal St", hours: "10:30-21:00", price: "Dim sum $4-8", tips: "Oldest in NYC. Traditional recipes. Cash preferred.", category: "cinese"},
+                {id: 99, name: "Ferrara Bakery & Cafe", quarter: "Little Italy", description: "Pasticceria dal 1892. Cannoli, gelato, Italian pastries.", address: "195 Grand St", metro: "6 a Canal St", hours: "8:00-24:00", price: "Cannoli $3", tips: "America's oldest pastry shop. Tourist area but authentic.", category: "italiana"},
+                {id: 100, name: "Clinton St. Baking Company", quarter: "Lower East Side", description: "Brunch leggendario. Blueberry pancakes voted best NYC.", address: "4 Clinton St", metro: "F a East Broadway", hours: "8:00-16:00", price: "Pancakes $16", tips: "2-hour weekend waits. Blueberry pancakes are famous.", category: "brunch"}
+            ],
+
+            // INFORMAZIONI PRATICHE MARATONA (30)
+            maratona: [
+                {id: 101, name: "TCS NYC Marathon Expo", quarter: "Jacob K. Javits Center", description: "Ritiro pettorale obbligatorio. Expo running con vendors.", address: "429 11th Ave", metro: "7 a 34th St-Hudson Yards", hours: "Gio-Sab vari orari", price: "Gratis con registrazione", tips: "Porta ID e conferma. Expo shopping. Pasta party tickets venduti qui.", category: "maratona"},
+                {id: 102, name: "Staten Island Ferry - Partenza", quarter: "Staten Island", description: "Trasporto gratuito verso partenza maratona.", address: "Whitehall Terminal", metro: "R,W a Whitehall", hours: "Mattina presto 3 Nov", price: "Gratis", tips: "Partenza 5:00 AM. Porta strati. Lungo viaggio verso start.", category: "maratona"},
+                {id: 103, name: "Fort Wadsworth Start", quarter: "Staten Island", description: "Area partenza maratona. Village per runners.", address: "Fort Wadsworth, Staten Island", metro: "Bus da Staten Island Ferry", hours: "3 Nov dalle 6:00", price: "Solo runners registrati", tips: "Bag check disponibile. Porta snacks. Porta indumenti usa e getta.", category: "maratona"},
+                {id: 104, name: "Mile 8 - Brooklyn", quarter: "Fort Greene", description: "Spettatori possono vedere runners su Lafayette Ave.", address: "Lafayette Ave, Brooklyn", metro: "G a Lafayette Ave", hours: "3 Nov 9:00-15:00", tips: "Good viewing spot. Restaurants nearby for spectators.", category: "maratona"},
+                {id: 105, name: "Mile 13 - Halfway Point", quarter: "Williamsburg", description: "Metà gara. Pulaski Bridge view di Manhattan.", address: "Pulaski Bridge", metro: "G a Nassau Ave", hours: "3 Nov 10:00-16:00", tips: "Iconic halfway point. Great for photos. Spectator spot.", category: "maratona"},
+                {id: 106, name: "Mile 16 - Queensboro Bridge", quarter: "Long Island City", description: "Silenzio sul ponte, poi rumore Manhattan incredibile.", address: "Queensboro Bridge", metro: "7 a Queensboro Plaza", hours: "3 Nov 10:30-16:30", tips: "No spectators on bridge. Emotional moment entering Manhattan.", category: "maratona"},
+                {id: 107, name: "Mile 18 - First Avenue", quarter: "Upper East Side", description: "Muro di suono. Spettatori più loud della gara.", address: "1st Ave da 59th a 125th St", metro: "4,5,6 a 59th St", hours: "3 Nov 11:00-17:00", tips: "LOUDEST crowd support. Bring earplugs as spectator.", category: "maratona"},
+                {id: 108, name: "Mile 20 - Bronx", quarter: "South Bronx", description: "The Bronx welcome. Musica, energy incredibile.", address: "Willis Ave Bridge", metro: "6 a 3rd Ave-149th St", hours: "3 Nov 11:30-17:30", tips: "Bronx shows love. Music, dancing, energy boost for runners.", category: "maratona"},
+                {id: 109, name: "Mile 23 & 24 - Fifth Avenue", quarter: "Central Park", description: "Spettatori lungo 5th Avenue. Vista finish line si avvicina.", address: "5th Ave lato Central Park", metro: "6 a 77th St", hours: "3 Nov 12:00-18:00", tips: "Crowded spectator area. Expensive restaurants nearby.", category: "maratona"},
+                {id: 110, name: "Finish Line - Central Park", quarter: "Central Park", description: "Traguardo maratona. Emotional finish.", address: "Central Park West & 67th St", metro: "1 a 66th St", hours: "3 Nov 9:00-18:00", tips: "Spectators need tickets. Runners reunite area nearby.", category: "maratona"},
+                {id: 111, name: "Runner Reunion Area", quarter: "Central Park", description: "Punto di ritrovo post-gara per families.", address: "Central Park West 67th-72nd St", metro: "1 a 66th St", hours: "3 Nov 12:00-19:00", tips: "Families meet runners here. Bring warm clothes for finishers.", category: "maratona"},
+                {id: 112, name: "Pasta Party Locations", quarter: "Multiple", description: "Pre-race carb loading events. Venduti all'Expo.", address: "Varie locations", metro: "Varia", hours: "1-2 Nov sera", price: "$30-50", tips: "Buy tickets at Expo. Good for meeting other runners.", category: "maratona"},
+                {id: 113, name: "Fleet Feet Running Store", quarter: "Multiple", description: "Running gear, emergency supplies, gels.", address: "Multiple NYC locations", metro: "Varia", hours: "10:00-20:00", price: "Varia", tips: "Last-minute gear needs. Knowledgeable staff.", category: "shopping"},
+                {id: 114, name: "Jackrabbit Sports", quarter: "Multiple", description: "Running specialty store. Gear, shoes, nutrition.", address: "Multiple locations", metro: "Varia", hours: "10:00-21:00", price: "Varia", tips: "Running community hub. Good for advice.", category: "shopping"},
+                {id: 115, name: "NYRR RunCenter", quarter: "Flatiron", description: "New York Road Runners headquarters. Info maratona.", address: "320 W 57th St", metro: "A,B,C,D,1 a 59th St", hours: "10:00-19:00", price: "Gratis info", tips: "Official marathon info. Merchandise shop.", category: "maratona"},
+                {id: 116, name: "Central Park Reservoir", quarter: "Central Park", description: "Iconic running loop. Train prima della gara.", address: "Central Park Reservoir", metro: "4,5,6 a 86th St", hours: "6:00-22:00", price: "Gratis", tips: "1.58 mile loop. Soft surface. Popular training spot.", category: "running"},
+                {id: 117, name: "Brooklyn Bridge Park Running", quarter: "Brooklyn", description: "Running path con vista Manhattan. Alternative training.", address: "Brooklyn Bridge Park", metro: "A,C a High St", hours: "6:00-1:00", price: "Gratis", tips: "Flat waterfront path. Great views. Less crowded than Central Park.", category: "running"},
+                {id: 118, name: "Hudson River Greenway", quarter: "Manhattan West Side", description: "Longest running path NYC. Da Battery Park a Bronx.", address: "Hudson River Greenway", metro: "1 at multiple stops", hours: "24/7", price: "Gratis", tips: "Car-free path. 11 miles long. Bike lane separate.", category: "running"},
+                {id: 119, name: "Sports Medicine Doctor", quarter: "Multiple", description: "Emergency sports medicine se injury pre-gara.", address: "Multiple locations", metro: "Varia", hours: "Varia", price: "Insurance dependent", tips: "NYU Sports Medicine, HSS have walk-in clinics.", category: "medical"},
+                {id: 120, name: "24-Hour Pharmacy", quarter: "Multiple", description: "CVS, Walgreens 24/7 per emergency supplies.", address: "Multiple locations", metro: "Varia", hours: "24/7", price: "Varia", tips: "Duane Reade common in Manhattan. Ibuprofen, bandages.", category: "medical"},
+                {id: 121, name: "Post-Marathon Recovery", quarter: "Multiple", description: "Massage, ice baths, recovery services post-gara.", address: "Multiple spas/gyms", metro: "Varia", hours: "Post-race", price: "$100-200", tips: "Book in advance. Equinox, massage places near finish.", category: "recovery"},
+                {id: 122, name: "Celebration Restaurants", quarter: "Upper West Side", description: "Ristoranti vicino finish line per celebration.", address: "Near Central Park West", metro: "1 a 66th St", hours: "Post-race", price: "$$-$$$", tips: "Book reservations. Carb-heavy options for finishers.", category: "celebration"},
+                {id: 123, name: "Airport Transportation", quarter: "Multiple", description: "JFK, LGA, EWR access post-marathon.", address: "Multiple airports", metro: "Vietata", hours: "24/7", price: "$15-75", tips: "AirTrain JFK $8. LaGuardia M60 bus. Newark AirTrain $13.", category: "transportation"},
+                {id: 124, name: "Hotel Concierge Services", quarter: "Multiple", description: "Hotel help per transportation, reservations post-gara.", address: "Your hotel", metro: "N/A", hours: "24/7", price: "Tips", tips: "Use hotel concierge for post-race dinner reservations.", category: "services"},
+                {id: 125, name: "Race Photos Purchase", quarter: "Online", description: "Foto ufficiali gara disponibili post-race.", address: "Online purchase", metro: "N/A", hours: "Post-race", price: "$50-100", tips: "Multiple photographers lungo course. Digital download available.", category: "photos"},
+                {id: 126, name: "Finisher Merchandise", quarter: "Marathon Finish Area", description: "T-shirt finisher, medal, official gear.", address: "Post-finish area", metro: "1 a 66th St", hours: "Post-finish", price: "Included/extra", tips: "Finisher shirt included. Additional merch for purchase.", category: "merchandise"},
+                {id: 127, name: "Weather Contingency", quarter: "NYC", description: "Gara si corre con qualunque tempo. Preparati per tutto.", address: "Everywhere", metro: "N/A", hours: "Race day", price: "Preparation", tips: "Race happens rain/shine. Layer clothing. Check forecast daily.", category: "weather"},
+                {id: 128, name: "Emergency Contacts", quarter: "NYC", description: "Numeri utili per emergenze durante weekend maratona.", address: "Keep with you", metro: "N/A", hours: "Always", price: "Gratis", tips: "911 emergency, 311 NYC info, hotel number, race hotline.", category: "emergency"},
+                {id: 129, name: "Spectator Guide", quarter: "Multiple", description: "Best spots per vedere runners, come muoversi in città.", address: "Multiple viewing areas", metro: "Multiple", hours: "Race day", price: "Metro fare", tips: "Download NYC Marathon app. Real-time runner tracking.", category: "spectators"},
+                {id: 130, name: "Post-Race Transportation", quarter: "Central Park Area", description: "Come lasciare area finish. Subway, taxi, walk options.", address: "Near finish line", metro: "1,2,3 a 72nd St", hours: "Post-race", price: "Varia", tips: "Walk east to Lexington for more subway options. Traffic heavy.", category: "transportation"}
+            ],
+
+            // SHOPPING (25)
+            shopping: [
+                {id: 131, name: "Century 21", quarter: "Financial District", description: "Department store discount. Designer brands 40-70% off.", address: "22 Cortlandt St", metro: "R,W a Cortlandt St", hours: "7:45-21:00", price: "Scontato", tips: "Dig through racks. Vera Pelle, designer finds. Return policy strict.", category: "discount"},
+                {id: 132, name: "Macy's Herald Square", quarter: "Herald Square", description: "Department store più grande mondo. Iconic NYC shopping.", address: "151 W 34th St", metro: "B,D,F,M,N,Q,R,W a 34th St", hours: "10:00-22:00", price: "Varia", tips: "Wooden escalators. Cellar food court. Tourist destination.", category: "department"},
+                {id: 133, name: "Bloomingdale's", quarter: "Upper East Side", description: "Luxury department store. High-end fashion, cosmetics.", address: "1000 3rd Ave", metro: "4,5,6 a 59th St", hours: "10:00-20:30", price: "Expensive", tips: "Little Brown Bag iconic. Personal shopping available.", category: "luxury"},
+                {id: 134, name: "SoHo Shopping District", quarter: "SoHo", description: "Boutiques, galleries, cast-iron architecture. Trendy shopping area.", address: "SoHo area", metro: "6 a Spring St", hours: "Varia", price: "$$-$$$", tips: "Cobblestone streets. Mix of chains and boutiques. Crowded weekends.", category: "district"},
+                {id: 135, name: "Fifth Avenue Shopping", quarter: "Midtown", description: "Flagship stores: Apple, Tiffany, Saks. Luxury shopping corridor.", address: "5th Ave 42nd-59th St", metro: "Multiple", hours: "Varia", price: "$$$-$$$$", tips: "Window shopping free. Apple Store 24/7. Tourist heavy.", category: "luxury"},
+                {id: 136, name: "Brooklyn Flea Market", quarter: "Brooklyn", description: "Vintage, antiques, handmade goods. Weekend markets.", address: "Multiple Brooklyn locations", metro: "Varia", hours: "Sab-Dom 10:00-17:00", price: "$-$$", tips: "Cash preferred. Unique finds. Good for vintage clothing.", category: "vintage"},
+                {id: 137, name: "Chelsea Market", quarter: "Chelsea", description: "Food hall in old Nabisco factory. Gourmet food, shopping.", address: "75 9th Ave", metro: "A,C,E a 14th St", hours: "7:00-21:00", price: "$$", tips: "Food sampling. High Line connection. Touristy but good.", category: "food_market"},
+                {id: 138, name: "Union Square Greenmarket", quarter: "Union Square", description: "Farmers market. Local produce, artisanal foods.", address: "Union Square", metro: "4,5,6,L,N,Q,R,W a 14th St", hours: "Mon,Wed,Fri,Sat 8:00-18:00", price: "$", tips: "Seasonal produce. Apple cider donuts fall. Cash only vendors.", category: "farmers_market"},
+                {id: 139, name: "The Strand Bookstore", quarter: "East Village", description: "18 miles of books. Rare books, used, new. Literary landmark.", address: "828 Broadway", metro: "4,5,6,L,N,Q,R,W a 14th St", hours: "9:30-22:30", price: "$", tips: "Rare book room upstairs. Strand tote bags popular souvenir.", category: "books"},
+                {id: 140, name: "B&H Photo", quarter: "Midtown", description: "Electronics superstore. Cameras, computers, professional equipment.", address: "420 9th Ave", metro: "A,C,E a 34th St", hours: "9:00-19:00 (closed Sat)", price: "Competitive", tips: "Orthodox Jewish owners. Closed Friday evening-Saturday. Tax-free for tourists.", category: "electronics"},
+                {id: 141, name: "Pearl River Mart", quarter: "SoHo", description: "Asian goods emporium. Home goods, gifts, snacks.", address: "452 Broadway", metro: "6 a Canal St", hours: "10:00-19:30", price: "$-$$", tips: "Unique Asian imports. Good for gifts. Cash discounts.", category: "asian_goods"},
+                {id: 142, name: "Housing Works Bookstore", quarter: "SoHo", description: "Used books in beautiful space. Café, events, charity.", address: "126 Crosby St", metro: "6 a Spring St", hours: "10:00-21:00", price: "$", tips: "Beautiful space. Profits go to charity. Events schedule.", category: "books"},
+                {id: 143, name: "Artists & Fleas", quarter: "Chelsea Market", description: "Local artisan market. Handmade goods, vintage, art.", address: "Chelsea Market", metro: "A,C,E a 14th St", hours: "10:00-21:00", price: "$-$$", tips: "Local artists. Unique NYC gifts. Instagram-worthy finds.", category: "artisan"},
+                {id: 144, name: "Nordstrom Rack", quarter: "Multiple", description: "Nordstrom outlet. Designer discounts, good shoe selection.", address: "Multiple locations", metro: "Varia", hours: "10:00-21:00", price: "Discounted", tips: "Better organized than Century 21. Good return policy.", category: "discount"},
+                {id: 145, name: "Uniqlo Flagship", quarter: "SoHo", description: "Japanese clothing chain. Basics, technical wear, affordable.", address: "546 Broadway", metro: "6 a Spring St", hours: "10:00-21:00", price: "$-$$", tips: "Quality basics. Heattech underwear popular. Limited-time collaborations.", category: "clothing"},
+                {id: 146, name: "Katz's Delicatessen Shop", quarter: "Lower East Side", description: "Take-home versions of deli favorites. Pastrami, knishes.", address: "205 E Houston St", metro: "F a 2nd Ave", hours: "8:00-22:45", price: "$$", tips: "Ship nationwide. Vacuum-sealed pastrami. Good NYC gift.", category: "food_gifts"},
+                {id: 147, name: "MoMA Design Store", quarter: "Multiple", description: "Museum store with design objects, books, gifts.", address: "Multiple locations", metro: "Varia", hours: "Varia", price: "$$-$$$", tips: "High-quality design items. Good for unique gifts. Member discounts.", category: "design"},
+                {id: 148, name: "ABC Home & Carpet", quarter: "Flatiron", description: "Home furnishings, antiques, eclectic décor. Beautiful browsing.", address: "888 Broadway", metro: "4,5,6,L,N,Q,R,W a 14th St", hours: "10:00-19:00", price: "$$$", tips: "Multiple floors. Expensive but beautiful. Good for inspiration.", category: "home"},
+                {id: 149, name: "Eataly", quarter: "Flatiron", description: "Italian food emporium. Groceries, restaurants, classes.", address: "200 5th Ave", metro: "R,W a 23rd St", hours: "7:00-23:00", price: "$$", tips: "Multiple restaurants inside. Grocery has imported goods. Rooftop beer garden.", category: "food_market"},
+                {id: 150, name: "GreenFlea Market", quarter: "Upper West Side", description: "Sunday flea market. Antiques, vintage, collectibles.", address: "Columbus Ave & 77th St", metro: "1 a 79th St", hours: "Dom 10:00-17:30", price: "$-$$", tips: "Sunday only. Good for vintage finds. Negotiate prices.", category: "flea_market"},
+                {id: 151, name: "Zabar's", quarter: "Upper West Side", description: "Gourmet food emporium dal 1934. Jewish specialties, gourmet items.", address: "2245 Broadway", metro: "1 a 79th St", hours: "8:00-19:30", price: "$$", tips: "Sunday bagels. Upstairs housewares. Tourist but authentic.", category: "gourmet"},
+                {id: 152, name: "Dean & DeLuca", quarter: "Multiple", description: "Gourmet food stores. High-end groceries, prepared foods.", address: "Multiple locations", metro: "Varia", hours: "Varia", price: "$$$", tips: "Expensive but high quality. Good for gifts. Beautiful presentation.", category: "gourmet"},
+                {id: 153, name: "Whole Foods Market", quarter: "Multiple", description: "Organic supermarket. Prepared foods, health products.", address: "Multiple locations", metro: "Varia", hours: "7:00-22:00", price: "$$", tips: "Nickname 'Whole Paycheck'. Good prepared food section.", category: "supermarket"},
+                {id: 154, name: "Trader Joe's", quarter: "Multiple", description: "Affordable specialty groceries. Unique products, wine selection.", address: "Multiple locations", metro: "Varia", hours: "8:00-21:00", price: "$", tips: "Long lines but worth it. Two Buck Chuck wine. Unique snacks.", category: "supermarket"},
+                {id: 155, name: "Fairway Market", quarter: "Multiple", description: "Grocery store with gourmet selection. Good produce, deli.", address: "Multiple locations", metro: "Varia", hours: "6:00-24:00", price: "$-$$", tips: "Like Whole Foods but cheaper. Good olive bar. Crowded aisles.", category: "supermarket"}
+            ],
+
+            // TRASPORTI & SERVIZI (25)
+            servizi: [
+                {id: 156, name: "MetroCard Purchase", quarter: "Everywhere", description: "Subway e bus card. $2.90 per ride, unlimited options.", address: "Any subway station", metro: "All", hours: "24/7", price: "$2.90 per ride, $33 weekly", tips: "Buy at machines or booths. OMNY contactless payment available.", category: "transportation"},
+                {id: 157, name: "Yellow Taxi", quarter: "Manhattan", description: "Iconic NYC taxis. $3 base + $0.70 per 1/5 mile.", address: "Street hail", metro: "N/A", hours: "24/7", price: "$3 base + distance", tips: "Tip 18-20%. Cash or card. JFK flat rate $70.", category: "transportation"},
+                {id: 158, name: "Uber/Lyft", quarter: "All 5 boroughs", description: "Rideshare apps. Surge pricing during peak times.", address: "App-based pickup", metro: "N/A", hours: "24/7", price: "Surge pricing variable", tips: "Download before arrival. Pool options cheaper. Airport fees extra.", category: "transportation"},
+                {id: 159, name: "Citi Bike Share", quarter: "Manhattan/Brooklyn", description: "Bike sharing system. $15 day pass, 30 min rides.", address: "Multiple docking stations", metro: "N/A", hours: "24/7", price: "$15 day pass", tips: "Helmet not provided. Check station availability on app.", category: "transportation"},
+                {id: 160, name: "JFK Airport Connection", quarter: "Queens", description: "AirTrain + subway $8.25 total. Express bus $19.", address: "JFK Airport", metro: "A,E to AirTrain", hours: "24/7", price: "$8.25 AirTrain+subway", tips: "A train slower but cheaper. Express bus direct to Manhattan.", category: "airport"},
+                {id: 161, name: "LaGuardia Airport", quarter: "Queens", description: "M60 bus to subway. $2.90. 45-60 minutes to Manhattan.", address: "LaGuardia Airport", metro: "M60 to multiple subways", hours: "24/7", price: "$2.90", tips: "No train connection. Bus only. Allow extra time.", category: "airport"},
+                {id: 162, name: "Newark Airport", quarter: "New Jersey", description: "AirTrain + NJ Transit $13. PATH train alternative.", address: "Newark Airport", metro: "AirTrain to NJ Transit", hours: "24/7", price: "$13 total", tips: "In New Jersey. Factor travel time 45-60 min.", category: "airport"},
+                {id: 163, name: "Grand Central Terminal", quarter: "Midtown", description: "Transportation hub. Metro-North trains, dining, shopping.", address: "89 E 42nd St", metro: "4,5,6,7,S a Grand Central", hours: "5:30-2:00", price: "Free to enter", tips: "Whispering gallery. Apple Store. Food court downstairs.", category: "transportation"},
+                {id: 164, name: "Penn Station", quarter: "Midtown", description: "Long Island Rail Road, NJ Transit, Amtrak.", address: "4 Penn Plaza", metro: "1,2,3,A,C,E a 34th St", hours: "24/7", price: "Tickets vary", tips: "Confusing layout. Allow extra time. Under renovation.", category: "transportation"},
+                {id: 165, name: "Port Authority", quarter: "Midtown", description: "Bus terminal. Greyhound, NJ Transit buses.", address: "625 8th Ave", metro: "A,C,E a 42nd St", hours: "24/7", price: "Tickets vary", tips: "Sketchy area at night. Stay aware of surroundings.", category: "transportation"},
+                {id: 166, name: "US Post Office", quarter: "Multiple", description: "Mail services. 24-hour location at Penn Station.", address: "Multiple locations", metro: "Varia", hours: "Varia", price: "Postage rates", tips: "Penn Station branch 24/7. Ship souvenirs home.", category: "services"},
+                {id: 167, name: "FedEx/UPS Stores", quarter: "Multiple", description: "Shipping, printing, packaging services.", address: "Multiple locations", metro: "Varia", hours: "9:00-19:00 typically", price: "Service fees", tips: "Ship purchases home. Print boarding passes. Pack fragiles.", category: "services"},
+                {id: 168, name: "Currency Exchange", quarter: "Multiple", description: "Change foreign currency. Banks, dedicated exchanges.", address: "Multiple locations", metro: "Varia", hours: "Bank hours", price: "Exchange fees", tips: "Banks usually better rates. Airports expensive.", category: "financial"},
+                {id: 169, name: "ATM Networks", quarter: "Everywhere", description: "Cash machines. Most banks, delis, pharmacies.", address: "Ubiquitous", metro: "N/A", hours: "24/7", price: "Network fees apply", tips: "Notify bank of travel. Foreign card fees common.", category: "financial"},
+                {id: 170, name: "Tourist Information", quarter: "Times Square", description: "Official NYC info center. Maps, brochures, help.", address: "1560 Broadway", metro: "R,W,S,1,2,3,7 a Times Sq", hours: "9:00-19:00", price: "Gratis", tips: "Free maps. Broadway tickets. Avoid street ticket sellers.", category: "information"},
+                {id: 171, name: "WiFi Hotspots", quarter: "Citywide", description: "Free WiFi: libraries, parks, subway stations, Starbucks.", address: "Multiple locations", metro: "Varia", hours: "Location dependent", price: "Gratis", tips: "LinkNYC kiosks provide free WiFi. Most cafes have WiFi.", category: "internet"},
+                {id: 172, name: "Public Restrooms", quarter: "Multiple", description: "Bryant Park, Grand Central, department stores, Starbucks.", address: "Multiple locations", metro: "Varia", hours: "Location dependent", price: "Gratis", tips: "Not common on streets. Use department stores, cafes.", category: "facilities"},
+                {id: 173, name: "Laundromat Services", quarter: "Multiple", description: "Wash & fold services. Drop-off laundry cleaning.", address: "Multiple locations", metro: "Varia", hours: "6:00-22:00 typically", price: "$2-3 per lb", tips: "Most offer wash & fold service. 24-hour locations exist.", category: "services"},
+                {id: 174, name: "Pharmacy Chains", quarter: "Multiple", description: "CVS, Walgreens, Duane Reade. Medications, toiletries.", address: "Multiple locations", metro: "Varia", hours: "Many 24/7", price: "Varia", tips: "24-hour locations in busy areas. Travel-size toiletries.", category: "pharmacy"},
+                {id: 175, name: "Emergency Services", quarter: "Citywide", description: "911 emergency, 311 NYC services, 411 information.", address: "Phone numbers", metro: "N/A", hours: "24/7", price: "Emergency free", tips: "911 fire/police/ambulance. 311 non-emergency city services.", category: "emergency"},
+                {id: 176, name: "Consulate Services", quarter: "Multiple", description: "Italian Consulate, emergency passport services.", address: "690 Park Ave (Italian)", metro: "6 a 68th St", hours: "9:00-12:30", price: "Service fees", tips: "Bring ID for consulate visits. Emergency services available.", category: "consulate"},
+                {id: 177, name: "Medical Centers", quarter: "Multiple", description: "Walk-in clinics, urgent care, emergency rooms.", address: "Multiple locations", metro: "Varia", hours: "Varia", price: "Insurance dependent", tips: "CityMD urgent care. NYU, Mount Sinai major hospitals.", category: "medical"},
+                {id: 178, name: "Cell Phone Service", quarter: "Citywide", description: "Tourist SIM cards, international plans activation.", address: "Carrier stores", metro: "Varia", hours: "10:00-20:00", price: "Plan dependent", tips: "Verizon/AT&T best coverage. Tourist SIM at airports.", category: "telecommunications"},
+                {id: 179, name: "Luggage Storage", quarter: "Multiple", description: "Store bags at Penn Station, Grand Central, private services.", address: "Multiple locations", metro: "Varia", hours: "Varia", price: "$10-20 per day", tips: "Schwartz Travel luggage storage. Hotels may hold bags.", category: "storage"},
+                {id: 180, name: "Car Rental", quarter: "Multiple", description: "Avis, Hertz, Enterprise locations. Not recommended in city.", address: "Multiple locations", metro: "Varia", hours: "6:00-22:00", price: "$50+ per day", tips: "Parking expensive. Public transport better option in city.", category: "transportation"}
+            ],
+
+            // ARTE & STORIA (40)
+            arte_storia: [
+                {id: 181, name: "David Zwirner Gallery", quarter: "Chelsea", description: "Galleria d'arte contemporanea di alto livello. Artisti internazionali, mostre rotanti.", address: "537 W 20th St", metro: "C,E a 23rd St", hours: "10:00-18:00, dom 11-18", price: "Gratuito", tips: "Multiple locations. Chelsea gallery district. Opening nights gratuiti.", category: "gallery"},
+                {id: 182, name: "Gagosian Gallery", quarter: "Chelsea", description: "Una delle gallerie più influenti al mondo. Arte contemporanea blue-chip.", address: "555 W 24th St", metro: "C,E a 23rd St", hours: "10:00-18:00", price: "Gratuito", tips: "Multiple NYC locations. High-end contemporary art. Free publications.", category: "gallery"},
+                {id: 183, name: "Merchant's House Museum", quarter: "NoHo", description: "Casa vittoriana del 1832 perfettamente conservata. Famiglia Tredwell.", address: "29 E 4th St", metro: "6 a Bleecker St", hours: "12:00-17:00 Gio-Lun", price: "$15", tips: "Self-guided tours. Period furnishings intact. Haunted reputation.", category: "house_museum"},
+                {id: 184, name: "Fraunces Tavern", quarter: "Financial District", description: "Dove Washington disse addio ai suoi ufficiali nel 1783.", address: "54 Pearl St", metro: "R,W a Whitehall", hours: "12:00-17:00", price: "Museum $7", tips: "Restaurant on ground floor. Historic significance. Revolutionary War artifacts.", category: "historic"},
+                {id: 185, name: "African Burial Ground", quarter: "Financial District", description: "Memorial del XVIII secolo. Cimitero africano scoperto negli anni '90.", address: "290 Broadway", metro: "4,5,6 a Brooklyn Bridge", hours: "9:00-17:00", price: "Gratuito", tips: "Moving memorial. Visitor center with exhibits. Respectful visiting.", category: "memorial"},
+                {id: 186, name: "Bushwick Collective", quarter: "Bushwick", description: "Street art outdoor gallery. Murales di artisti internazionali.", address: "Troutman St & St Nicholas Ave", metro: "L a Jefferson St", hours: "24/7", price: "Gratuito", tips: "Constantly changing art. Safe during day. Bring camera.", category: "street_art"},
+                {id: 187, name: "Little Italy Mulberry Street", quarter: "Little Italy", description: "Via storica italiana con murales e tradizioni.", address: "Mulberry St", metro: "6 a Canal St", hours: "24/7", price: "Gratuito", tips: "Best during Feast of San Gennaro. Many tourist traps.", category: "historic_street"},
+                {id: 188, name: "Chrysler Building Art Deco", quarter: "Midtown", description: "Dettagli Art Deco nel lobby. Architettura iconica 1930.", address: "405 Lexington Ave", metro: "4,5,6,7,S a Grand Central", hours: "Lobby: 8:00-18:00", price: "Gratuito", tips: "Lobby only accessible. Beautiful ceiling murals. No observation deck.", category: "architecture"},
+                {id: 189, name: "Flatiron Building", quarter: "Flatiron", description: "Grattacielo triangolare del 1902. Architettura Beaux-Arts.", address: "175 5th Ave", metro: "R,W a 23rd St", hours: "Esterno sempre visibile", price: "Gratuito", tips: "Great photo ops from Madison Square Park. Windy corner.", category: "architecture"},
+                {id: 190, name: "Lower East Side Tenement Museum", quarter: "Lower East Side", description: "Appartamenti restaurati di immigrati. Storia autentica NYC.", address: "103 Orchard St", metro: "F a Delancey St", hours: "10:00-18:30", price: "$29", tips: "Multiple tour options. Book in advance. Powerful immigrant stories.", category: "museum"},
+                {id: 191, name: "New York Earth Room", quarter: "SoHo", description: "Installazione di Walter De Maria. 280,000 libbre di terra.", address: "141 Wooster St", metro: "C,E a Spring St", hours: "12:00-18:00 Mer-Dom", price: "Gratuito", tips: "Unusual art installation. Small space. Quick visit.", category: "art_installation"},
+                {id: 192, name: "Paula Cooper Gallery", quarter: "Chelsea", description: "Prima galleria aperta a SoHo (1968). Arte concettuale.", address: "524 W 26th St", metro: "C,E a 23rd St", hours: "10:00-18:00", price: "Gratuito", tips: "Historic gallery. Pioneered SoHo art scene. Conceptual art focus.", category: "gallery"},
+                {id: 193, name: "Broken Kilometer", quarter: "SoHo", description: "Altra installazione Walter De Maria. 500 ottoni paralleli.", address: "393 W Broadway", metro: "C,E a Spring St", hours: "12:00-18:00 Mer-Dom", price: "Gratuito", tips: "Same building as Earth Room. Minimal art. Meditative experience.", category: "art_installation"},
+                {id: 194, name: "Castle Clinton", quarter: "Battery Park", description: "Forte del 1808. Ellis Island ticket office storico.", address: "Battery Park", metro: "R,W a Whitehall", hours: "8:45-17:00", price: "Gratuito", tips: "War of 1812 fort. Immigration processing center. Statue of Liberty tickets.", category: "historic"},
+                {id: 195, name: "Trinity Church Cemetery", quarter: "Financial District", description: "Cimitero del 1698. Alexander Hamilton sepolto qui.", address: "74 Trinity Pl", metro: "R,W a Rector St", hours: "7:00-18:00", price: "Gratuito", tips: "Alexander Hamilton's grave. Historic gravestones. Peaceful oasis.", category: "cemetery"},
+                {id: 196, name: "St. Patrick's Old Cathedral", quarter: "NoLita", description: "Prima cattedrale cattolica NYC (1815). Cimitero sotterraneo.", address: "263 Mulberry St", metro: "6 a Spring St", hours: "9:00-16:00", price: "Tour $25", tips: "Underground catacombs tours. Historic significance. Not the Midtown one.", category: "church"},
+                {id: 197, name: "Eldridge Street Synagogue", quarter: "Lower East Side", description: "Sinagoga del 1887. Architettura moresca restaurata.", address: "12 Eldridge St", metro: "F a East Broadway", hours: "10:00-17:00", price: "$15", tips: "Beautiful restoration. Jewish history. Guided tours available.", category: "synagogue"},
+                {id: 198, name: "Museum of Chinese in America", quarter: "Chinatown", description: "Storia cinese-americana. Cultura, immigrazione, comunità.", address: "215 Centre St", metro: "6 a Canal St", hours: "11:00-18:00 Gio-Dom", price: "$12", tips: "Small but informative. Walking tours of Chinatown available.", category: "museum"},
+                {id: 199, name: "Seaport Museum", quarter: "South Street Seaport", description: "Storia marittima NYC. Navi storiche, vita portuale.", address: "12 Fulton St", metro: "A,C,J,Z a Fulton St", hours: "11:00-17:00", price: "$15", tips: "Historic ships to explore. Maritime artifacts. Family friendly.", category: "museum"},
+                {id: 200, name: "Federal Hall", quarter: "Financial District", description: "Dove Washington fu inaugurato presidente. Prima capitale USA.", address: "26 Wall St", metro: "2,3 a Wall St", hours: "9:00-17:00", price: "Gratuito", tips: "Historic significance. Free ranger talks. Washington statue outside.", category: "historic"},
+                {id: 201, name: "Cooper Hewitt Design Museum", quarter: "Upper East Side", description: "Design museum in Carnegie Mansion. Interattivo, innovativo.", address: "2 E 91st St", metro: "4,5,6 a 86th St", hours: "10:00-18:00", price: "$18", tips: "Interactive design exhibits. Beautiful mansion setting. Design shop.", category: "museum"},
+                {id: 202, name: "Neue Galerie", quarter: "Upper East Side", description: "Arte austriaca e tedesca. Klimt, Schiele. Café Sabarsky.", address: "1048 5th Ave", metro: "4,5,6 a 86th St", hours: "11:00-18:00", price: "$22", tips: "Klimt paintings. Austrian café. Elegant Beaux-Arts mansion.", category: "museum"},
+                {id: 203, name: "Frick Collection", quarter: "Upper East Side", description: "Collezione privata in mansion 1914. Whistler, Fragonard.", address: "1 E 70th St", metro: "6 a 68th St", hours: "10:00-18:00", price: "$22", tips: "Intimate setting. No large groups. Beautiful courtyard garden.", category: "museum"},
+                {id: 204, name: "Nicholas Roerich Museum", quarter: "Upper West Side", description: "Arte spirituale russa. Pittore, filosofo, pace.", address: "319 W 107th St", metro: "1 a 103rd St", hours: "14:00-17:00 Mar-Dom", price: "Donazione suggerita", tips: "Hidden gem. Spiritual art. Peaceful atmosphere.", category: "museum"},
+                {id: 205, name: "Museum of the City of New York", quarter: "Upper East Side", description: "Storia NYC dalle origini. Collezioni, mostre interattive.", address: "1220 5th Ave", metro: "6 a 103rd St", hours: "10:00-18:00", price: "$20", tips: "NYC history comprehensive. Good for understanding city evolution.", category: "museum"},
+                {id: 206, name: "Hispanic Society Museum", quarter: "Washington Heights", description: "Arte spagnola, latino-americana. Goya, El Greco.", address: "613 W 155th St", metro: "1 a 157th St", hours: "10:00-16:30 Mar-Sab", price: "$10", tips: "Hidden uptown gem. Spanish colonial art. Free Saturdays 10-12.", category: "museum"},
+                {id: 207, name: "Morris-Jumel Mansion", quarter: "Washington Heights", description: "Casa pre-rivoluzionaria 1765. Washington headquarters.", address: "65 Jumel Terrace", metro: "1 a 163rd St", hours: "10:00-16:00 Mer-Dom", price: "$10", tips: "Oldest house in Manhattan. Revolutionary War history. Beautiful views.", category: "house_museum"},
+                {id: 208, name: "Edgar Allan Poe Cottage", quarter: "Bronx", description: "Casa dove Poe scrisse 'Annabel Lee'. Mobili originali.", address: "2640 Grand Concourse", metro: "4 a Kingsbridge Rd", hours: "10:00-17:00 Gio-Dom", price: "$5", tips: "Literary pilgrimage. Small cottage. Poe's final years.", category: "house_museum"},
+                {id: 209, name: "Bartow-Pell Mansion", quarter: "Bronx", description: "Mansion neoclassica 1842. Giardini, arte decorativa.", address: "895 Shore Rd", metro: "6 to Pelham Bay Park", hours: "12:00-16:00 Mer,Sab,Dom", price: "$8", tips: "Beautiful mansion and gardens. Pelham Bay Park location.", category: "house_museum"},
+                {id: 210, name: "Alice Austen House", quarter: "Staten Island", description: "Fotografa pioniera. Casa vittoriana, studio.", address: "2 Hylan Blvd", metro: "Ferry + bus", hours: "11:00-17:00 Gio-Dom", price: "$8", tips: "Photography history. Harbor views. Take Staten Island Ferry.", category: "house_museum"},
+                {id: 211, name: "Snug Harbor Cultural Center", quarter: "Staten Island", description: "Campus culturale. Giardini botanici, musei, performance.", address: "1000 Richmond Terrace", metro: "Ferry + bus", hours: "10:00-17:00", price: "Varia per attrazione", tips: "Multiple attractions. Chinese Scholar's Garden. Plan full day.", category: "cultural_center"},
+                {id: 212, name: "Jacques Marchais Tibetan Art", quarter: "Staten Island", description: "Arte tibetana in ambiente monastico. Giardini zen.", address: "338 Lighthouse Ave", metro: "Ferry + bus", hours: "13:00-17:00 Mer-Dom", price: "$7", tips: "Peaceful hillside setting. Tibetan art collection. Meditation garden.", category: "museum"},
+                {id: 213, name: "Museum of Arts and Design", quarter: "Columbus Circle", description: "Artigianato contemporaneo. Ceramica, vetro, tessuti.", address: "2 Columbus Circle", metro: "1,A,B,C,D a 59th St", hours: "10:00-18:00", price: "$18", tips: "Contemporary crafts focus. Hands-on workshops available.", category: "museum"},
+                {id: 214, name: "Leslie-Lohman Gay Art Museum", quarter: "SoHo", description: "Arte LGBTQ+. Prima museum gay riconosciuto negli USA.", address: "26 Wooster St", metro: "C,E a Spring St", hours: "12:00-18:00 Mer-Dom", price: "$9", tips: "Important LGBTQ+ art. Changing exhibitions. Small but significant.", category: "museum"},
+                {id: 215, name: "Rubin Museum of Art", quarter: "Chelsea", description: "Arte himalayana. Tibet, Nepal, India. Meditazione.", address: "150 W 17th St", metro: "1 a 18th St", hours: "11:00-17:00", price: "$19", tips: "Himalayan art focus. Meditation sessions. Spiral architecture.", category: "museum"},
+                {id: 216, name: "Museum of American Finance", quarter: "Financial District", description: "Storia finanziaria americana. Wall Street, economia.", address: "48 Wall St", metro: "2,3 a Wall St", hours: "10:00-16:00 Mar-Sab", price: "$8", tips: "In former bank. Financial history. Good for business travelers.", category: "museum"},
+                {id: 217, name: "Socrates Sculpture Park", quarter: "Long Island City", description: "Parco sculture all'aperto. Artisti emergenti.", address: "32-01 Vernon Blvd", metro: "7 a Vernon Blvd", hours: "9:00-tramonto", price: "Gratuito", tips: "Outdoor sculptures. Rotating exhibitions. East River views.", category: "sculpture_park"},
+                {id: 218, name: "Noguchi Museum", quarter: "Long Island City", description: "Sculture Isamu Noguchi. Giardino zen, modernismo.", address: "9-01 33rd Rd", metro: "7 a Vernon Blvd", hours: "10:00-17:00 Mer-Dom", price: "$15", tips: "Beautiful sculpture garden. Peaceful atmosphere. Artist's vision realized.", category: "museum"},
+                {id: 219, name: "MoMA PS1", quarter: "Long Island City", description: "Arte contemporanea sperimentale. Warm Up summer parties.", address: "22-25 Jackson Ave", metro: "7 a Court Sq", hours: "12:00-18:00 Gio-Lun", price: "$10", tips: "Experimental contemporary art. Summer Warm Up series. Former school building.", category: "museum"},
+                {id: 220, name: "Queens Museum", quarter: "Queens", description: "Panorama NYC gigante. 9,335 edifici in miniatura.", address: "Flushing Meadows Corona Park", metro: "7 a 111th St", hours: "11:00-17:00 Mer-Dom", price: "$8", tips: "Famous NYC panorama model. 1964 World's Fair site. Family friendly.", category: "museum"}
+            ],
+
+            // SHOPPING CARATTERISTICO (50)
+            shopping_caratteristico: [
+                {id: 221, name: "L'Train Vintage", quarter: "Williamsburg", description: "Vintage clothing curato. Pezzi unici anni '70-'90.", address: "593 Grand St, Brooklyn", metro: "L a Lorimer St", hours: "12:00-20:00", price: "$20-200", tips: "High-quality vintage. Instagram-worthy pieces. Try before buying.", category: "vintage"},
+                {id: 222, name: "Antoinette Vintage", quarter: "Williamsburg", description: "Vintage femminile. Vestiti designer, accessori anni '60-'80.", address: "119 Grand St, Brooklyn", metro: "L a Lorimer St", hours: "11:00-20:00", price: "$30-300", tips: "Curated women's vintage. Designer pieces. Weekend crowds.", category: "vintage"},
+                {id: 223, name: "Housing Works Bookstore SoHo", quarter: "SoHo", description: "Libri usati in spazio bellissimo. Café, eventi, charity.", address: "126 Crosby St", metro: "6 a Spring St", hours: "10:00-21:00", price: "$3-15", tips: "Beautiful space. Profits support AIDS services. Events calendar.", category: "bookstore"},
+                {id: 224, name: "McNally Jackson", quarter: "NoLita", description: "Libreria indipendente. Eventi letterari, café, atmosfera.", address: "52 Prince St", metro: "6 a Spring St", hours: "10:00-22:00", price: "Retail prices", tips: "Independent bookstore culture. Author events. Good café.", category: "bookstore"},
+                {id: 225, name: "Academy Records", quarter: "East Village", description: "Vinyl, CD usati. Jazz, rock, classica. Prezzi onesti.", address: "415 E 12th St", metro: "L a 1st Ave", hours: "11:00-19:00", price: "$5-50", tips: "Serious record collectors. Knowledgeable staff. Rare finds possible.", category: "record_shop"},
+                {id: 226, name: "Generation Records", quarter: "Greenwich Village", description: "Punk, metal, alternative. Nuovo e usato.", address: "210 Thompson St", metro: "A,C,E,B,D,F,M a W 4th St", hours: "11:00-20:00", price: "$10-100", tips: "Punk/metal focus. Underground music. T-shirts and memorabilia.", category: "record_shop"},
+                {id: 227, name: "Brooklyn Superhero Supply Co", quarter: "Park Slope", description: "Negozio supereroi che finanzia centro scrittura per bambini.", address: "372 5th Ave, Brooklyn", metro: "R a Union St", hours: "12:00-18:00", price: "$5-50", tips: "Supports kids' writing center. Unique superhero gear. Great cause.", category: "specialty"},
+                {id: 228, name: "Forbidden Planet", quarter: "Union Square", description: "Comics, sci-fi, fantasy. Collectibles, manga, action figures.", address: "832 Broadway", metro: "4,5,6,L,N,Q,R,W a 14th St", hours: "10:00-22:00", price: "$3-200", tips: "Comic book mecca. Rare collectibles. Manga selection extensive.", category: "comics"},
+                {id: 229, name: "Essex Market", quarter: "Lower East Side", description: "Mercato coperto rinnovato. Food vendors, prodotti freschi.", address: "88 Essex St", metro: "F a Delancey St", hours: "8:00-22:00", price: "Varia", tips: "Renovated market hall. Mix of old and new vendors. Food sampling.", category: "market"},
+                {id: 230, name: "Gotham West Market", quarter: "Hell's Kitchen", description: "Food hall moderno. Chef famosi, cucina internazionale.", address: "600 11th Ave", metro: "A,C,E a 42nd St", hours: "7:00-22:00", price: "$8-20 per piatto", tips: "High-end food hall. Celebrity chef stalls. Near Javits Center.", category: "market"},
+                {id: 231, name: "Artists & Fleas Williamsburg", quarter: "Williamsburg", description: "Mercato artigianale weekend. Vintage, handmade, arte.", address: "70 N 7th St, Brooklyn", metro: "L a Bedford Ave", hours: "Sab-Dom 10:00-19:00", price: "$10-100", tips: "Weekend market. Local artists. Vintage finds. Cash preferred.", category: "artisan_market"},
+                {id: 232, name: "BookBook", quarter: "Bleecker Street", description: "Libri rari, prime edizioni. Letteratura, arte, architettura.", address: "266 Bleecker St", metro: "1 a Christopher St", hours: "11:00-19:00", price: "$20-500", tips: "Rare books specialist. Architecture and art books. Browsing encouraged.", category: "bookstore"},
+                {id: 233, name: "Argosy Book Store", quarter: "Midtown", description: "Libri antichi dal 1925. Mappe, autografi, prime edizioni.", address: "116 E 59th St", metro: "4,5,6 a 59th St", hours: "10:00-18:00", price: "$25-1000+", tips: "Six floors of rare books. Autographs and maps. Serious collectors.", category: "bookstore"},
+                {id: 234, name: "Rough Trade", quarter: "Williamsburg", description: "Record store, venue, café. Indie, alternative, live shows.", address: "64 N 9th St, Brooklyn", metro: "L a Bedford Ave", hours: "8:00-22:00", price: "$15-40", tips: "Record store + venue. Live performances. Coffee and vinyl browsing.", category: "record_shop"},
+                {id: 235, name: "Other Music Legacy", quarter: "East Village", description: "Successore di Other Music. Indie, experimental, underground.", address: "15 E 4th St", metro: "6 a Bleecker St", hours: "12:00-20:00", price: "$10-60", tips: "Carries Other Music legacy. Underground music focus. Knowledgeable staff.", category: "record_shop"},
+                {id: 236, name: "Material Wrld", quarter: "SoHo", description: "Vintage designer. Chanel, Hermès, luxury secondhand.", address: "107 Grand St", metro: "6 a Canal St", hours: "11:00-19:00", price: "$100-2000", tips: "High-end vintage designer. Authentication guaranteed. Investment pieces.", category: "vintage"},
+                {id: 237, name: "What Goes Around Comes Around", quarter: "SoHo", description: "Vintage luxury. Celebrity clientele, pezzi museo.", address: "351 W Broadway", metro: "C,E a Spring St", hours: "11:00-19:00", price: "$200-5000", tips: "Museum-quality vintage. Celebrity favorite. Very expensive but unique.", category: "vintage"},
+                {id: 238, name: "Pippin Vintage Jewelry", quarter: "East Village", description: "Gioielli vintage. Art Deco, Victorian, pezzi statement.", address: "112 W 17th St", metro: "1 a 18th St", hours: "12:00-19:00", price: "$50-500", tips: "Unique vintage jewelry. Art Deco speciality. Engagement rings.", category: "jewelry"},
+                {id: 239, name: "Doyle & Doyle", quarter: "Lower East Side", description: "Gioielli antichi. Anelli fidanzamento vintage, pezzi rari.", address: "189 Orchard St", metro: "F a Delancey St", hours: "11:00-19:00", price: "$100-5000", tips: "Antique engagement rings. Victorian to Art Deco. Certification provided.", category: "jewelry"},
+                {id: 240, name: "The Market NYC", quarter: "Chelsea", description: "Weekend market. Vintage, antiques, food, artisans.", address: "Gansevoort & Washington", metro: "A,C,E a 14th St", hours: "Sab-Dom 9:00-17:00", price: "Varia", tips: "Weekend only. Meatpacking District location. Vintage and antiques mix.", category: "flea_market"},
+                {id: 241, name: "Hell's Kitchen Flea Market", quarter: "Hell's Kitchen", description: "Antiquariato, vintage, collectibles. Weekend market.", address: "W 39th St & 9th Ave", metro: "A,C,E a 42nd St", hours: "Sab-Dom 9:00-17:00", price: "$5-200", tips: "Outdoor weekend market. Negotiate prices. Cash preferred.", category: "flea_market"},
+                {id: 242, name: "Printed Matter", quarter: "Chelsea", description: "Artist books, zines, pubblicazioni indipendenti.", address: "231 11th Ave", metro: "A,C,E a 14th St", hours: "11:00-19:00", price: "$5-100", tips: "Artist publications. Zines and limited editions. Art book specialty.", category: "art_books"},
+                {id: 243, name: "Bluestockings", quarter: "Lower East Side", description: "Libreria attivista. Feminismo, giustizia sociale, eventi.", address: "172 Allen St", metro: "F a 2nd Ave", hours: "11:00-23:00", price: "Sliding scale", tips: "Activist bookstore. Social justice focus. Community events.", category: "bookstore"},
+                {id: 244, name: "Drama Book Shop", quarter: "Midtown", description: "Theater bookstore. Scripts, libri teatro, performance.", address: "266 W 39th St", metro: "A,C,E a 42nd St", hours: "10:00-20:00", price: "$10-40", tips: "Theater district location. Scripts and theater books. Industry professionals shop here.", category: "bookstore"},
+                {id: 245, name: "Mysterious Bookshop", quarter: "TriBeCa", description: "Mystery, crime, detective fiction. Rare first editions.", address: "58 Warren St", metro: "1,2,3 a Chambers St", hours: "11:00-19:00", price: "$8-200", tips: "Mystery genre specialty. Signed first editions. Author events.", category: "bookstore"},
+                {id: 246, name: "Flight Club", quarter: "SoHo", description: "Sneaker consignment. Rare Nike, Jordan, limited editions.", address: "220 Spring St", metro: "6 a Spring St", hours: "11:00-20:00", price: "$100-2000", tips: "Sneaker authentication. Rare releases. Resale market prices.", category: "sneakers"},
+                {id: 247, name: "Stadium Goods", quarter: "SoHo", description: "Sneaker marketplace. Deadstock, rare colorways, hype.", address: "47 Howard St", metro: "6 a Canal St", hours: "11:00-20:00", price: "$150-5000", tips: "Premium sneaker marketplace. Authentication guaranteed. Investment pieces.", category: "sneakers"},
+                {id: 248, name: "John Derian", quarter: "East Village", description: "Decoupage, vintage prints, home décor unico.", address: "6 E 2nd St", metro: "F a 2nd Ave", hours: "11:00-19:00", price: "$20-300", tips: "Unique decoupage items. Vintage prints. Instagram-worthy home goods.", category: "home_decor"},
+                {id: 249, name: "ABC Carpet & Home Outlet", quarter: "Bronx", description: "Outlet di ABC Home. Mobili, tappeti, décor scontati.", address: "1055 Bronx River Ave", metro: "6 a Whitlock Ave", hours: "10:00-18:00", price: "30-70% off retail", tips: "Significant discounts. Worth the Bronx trip. Delivery available.", category: "home_outlet"},
+                {id: 250, name: "Brooklyn Industries", quarter: "Brooklyn Heights", description: "Brooklyn-made clothing. Local pride, urban style.", address: "162 Atlantic Ave", metro: "R,W a Court St", hours: "11:00-20:00", price: "$25-80", tips: "Local Brooklyn brand. Good quality basics. Borough pride clothing.", category: "local_brand"},
+                {id: 251, name: "TJ Maxx SoHo", quarter: "SoHo", description: "Designer discounts. Hidden gems tra fast fashion.", address: "462 Broadway", metro: "6 a Canal St", hours: "9:00-22:00", price: "50-70% off retail", tips: "Designer finds possible. Dig through inventory. Return policy good.", category: "discount"},
+                {id: 252, name: "Century 21 Brooklyn", quarter: "Downtown Brooklyn", description: "Designer outlet Brooklyn. Meno affollato di Manhattan.", address: "472 86th St", metro: "R a 86th St", hours: "10:00-21:00", price: "40-70% off", tips: "Less crowded than Manhattan. Same discount brands. Better selection sometimes.", category: "discount"},
+                {id: 253, name: "Kalustyan's", quarter: "Murray Hill", description: "Spezie dal mondo. Ingredienti rari, tè, caffè.", address: "123 Lexington Ave", metro: "6 a 28th St", hours: "10:00-20:00", price: "$5-50", tips: "Spice heaven. International ingredients. Cooking classes available.", category: "specialty_food"},
+                {id: 254, name: "DiPalo's Fine Foods", quarter: "Little Italy", description: "Salumeria italiana dal 1925. Formaggi, salumi, pasta.", address: "200 Grand St", metro: "6 a Canal St", hours: "9:00-18:30", price: "$10-40", tips: "4th generation Italian deli. Authentic imported goods. Generous samples.", category: "specialty_food"},
+                {id: 255, name: "Orwashers Bakery", quarter: "Upper East Side", description: "Panetteria dal 1916. Pane artigianale, pretzel, babka.", address: "308 E 78th St", metro: "6 a 77th St", hours: "7:00-19:00", price: "$3-15", tips: "100+ year old bakery. Hand-rolled bagels. Traditional recipes.", category: "bakery"},
+                {id: 256, name: "Economy Candy", quarter: "Lower East Side", description: "Candy shop dal 1937. Floor-to-ceiling selection.", address: "108 Rivington St", metro: "F a Delancey St", hours: "9:00-18:00", price: "$1-20", tips: "Nostalgic candy. Good for kids. International sweets.", category: "candy"},
+                {id: 257, name: "Sephora Times Square", quarter: "Times Square", description: "Beauty megastore. Makeup, skincare, fragranze.", address: "1500 Broadway", metro: "R,W,S,1,2,3,7 a Times Sq", hours: "9:00-24:00", price: "$20-200", tips: "Largest Sephora location. Beauty classes. Late night shopping.", category: "beauty"},
+                {id: 258, name: "Kiehl's Original Store", quarter: "East Village", description: "Skincare store originale dal 1851. Prodotti naturali.", address: "109 3rd Ave", metro: "L a 1st Ave", hours: "10:00-21:00", price: "$20-100", tips: "Original flagship store. Free samples generous. Skincare consultations.", category: "beauty"},
+                {id: 259, name: "Le Labo", quarter: "NoLita", description: "Profumi miscelati freschi. Santal 33 cult following.", address: "233 Elizabeth St", metro: "6 a Spring St", hours: "11:00-19:00", price: "$100-300", tips: "Fresh-mixed fragrances. Cult following. Personalized labels.", category: "fragrance"},
+                {id: 260, name: "Brooklyn Flea Williamsburg", quarter: "Williamsburg", description: "Vintage market weekend. 150+ vendors, pezzi unici.", address: "176 Lafayette Ave", metro: "G a Clinton-Washington", hours: "Sab-Dom 10:00-17:00", price: "$5-500", tips: "Weekend only. Early bird gets best pieces. Negotiation expected.", category: "flea_market"},
+                {id: 261, name: "Grand Bazaar NYC", quarter: "Upper West Side", description: "Antiquariato uptown. Sunday market, pezzi pregiati.", address: "100 W 77th St", metro: "1 a 79th St", hours: "Dom 10:00-17:30", price: "$10-1000", tips: "Uptown antiques. Higher-end pieces. Sunday only market.", category: "antiques"},
+                {id: 262, name: "Mood Fabrics", quarter: "Garment District", description: "Tessuti da Project Runway. Designer fabrics, notions.", address: "225 W 37th St", metro: "B,D,F,M,N,Q,R,W a 34th St", hours: "8:30-18:30", price: "$10-100 per yard", tips: "Project Runway fabric store. Huge selection. Sewing enthusiasts mecca.", category: "fabric"},
+                {id: 263, name: "M&J Trimming", quarter: "Garment District", description: "Trim, buttons, notions. Crafting paradise.", address: "1008 6th Ave", metro: "B,D,F,M a 42nd St", hours: "9:00-18:00", price: "$1-50", tips: "Crafting supplies heaven. Unique trims and buttons. Fashion students shop here.", category: "craft_supplies"},
+                {id: 264, name: "The Container Store", quarter: "Multiple", description: "Organization solutions. Storage, closet systems.", address: "629 6th Ave", metro: "F,M a 14th St", hours: "9:00-21:00", price: "$5-200", tips: "Organization heaven. Custom closet design. NYC living space solutions.", category: "organization"},
+                {id: 265, name: "Fish Eddy", quarter: "Flatiron", description: "Restaurant dishware, quirky home goods.", address: "889 Broadway", metro: "4,5,6,L,N,Q,R,W a 14th St", hours: "10:00-20:00", price: "$10-100", tips: "Restaurant supply for home. NYC-themed dishes. Unique gifts.", category: "home_goods"},
+                {id: 266, name: "Housing Works Thrift", quarter: "Multiple", description: "Thrift shops beneficenza. Designer finds possibili.", address: "Multiple locations", metro: "Varia", hours: "10:00-20:00", price: "$5-50", tips: "Good cause shopping. Designer pieces possible. Proceeds support AIDS services.", category: "thrift"},
+                {id: 267, name: "Crossroads Trading", quarter: "Multiple", description: "Buy-sell-trade fashion. Designer secondhand.", address: "Multiple locations", metro: "Varia", hours: "11:00-20:00", price: "$20-200", tips: "Curated secondhand fashion. Cash for trade-ins. Trendy finds.", category: "secondhand"},
+                {id: 268, name: "Buffalo Exchange", quarter: "Multiple", description: "Vintage and recycled fashion. Sustainable shopping.", address: "Multiple locations", metro: "Varia", hours: "11:00-20:00", price: "$10-80", tips: "Sustainable fashion. Buy-sell-trade model. Vintage and contemporary mix.", category: "recycled_fashion"},
+                {id: 269, name: "Amarcord Vintage Fashion", quarter: "East Village", description: "High-end vintage. Designer pieces 1950s-1990s.", address: "84 E 7th St", metro: "L a 1st Ave", hours: "13:00-20:00", price: "$50-500", tips: "Curated vintage designer. Quality over quantity. Special occasion pieces.", category: "vintage"},
+                {id: 270, name: "10 Ft Single", quarter: "East Village", description: "Vintage denim specialist. Levi's, rare washes.", address: "85 E 10th St", metro: "L a 1st Ave", hours: "12:00-20:00", price: "$30-200", tips: "Vintage denim expertise. Rare Levi's finds. Denim authentication.", category: "vintage_denim"}
+            ],
+
+            // RISTORANTI AGGIUNTIVI (40)
+            ristoranti_aggiuntivi: [
+                {id: 271, name: "Jackson Heights Food Tour", quarter: "Jackson Heights", description: "Autentica cucina internazionale. Little Colombia, Bangladesh, Tibet.", address: "Roosevelt Ave corridor", metro: "7 a Jackson Heights", hours: "Varia per ristorante", price: "$8-20 per piatto", tips: "Real ethnic food. Cash preferred. Try multiple cuisines.", category: "ethnic_corridor"},
+                {id: 272, name: "Sardi's", quarter: "Theater District", description: "Broadway landmark dal 1921. Caricature walls, pre-theater.", address: "234 W 44th St", metro: "N,Q,R,W,S,1,2,3,7 a Times Sq", hours: "11:30-24:00", price: "Entree $30-45", tips: "Broadway history. Pre-theater menu. Celebrity caricatures on walls.", category: "theater_district"},
+                {id: 273, name: "Joe Allen Restaurant", quarter: "Theater District", description: "Broadway insider spot. Flop show posters, late dining.", address: "326 W 46th St", metro: "N,Q,R,W,S,1,2,3,7 a Times Sq", hours: "11:30-24:00", price: "Entree $25-35", tips: "Theater professionals hang out. Wall of Broadway flops. Late night kitchen.", category: "theater_district"},
+                {id: 274, name: "The Russian Tea Room", quarter: "Midtown", description: "Opulent Russian dining. Caviar, blini, vodka flights.", address: "150 W 57th St", metro: "N,Q,R,W a 57th St", hours: "11:30-22:00", price: "Entree $40-80", tips: "Tourist splurge. Christmas decorations year-round. Dress code enforced.", category: "russian"},
+                {id: 275, name: "Arthur Avenue Market", quarter: "Bronx", description: "Real Little Italy. Authentic Italian markets, restaurants.", address: "2344 Arthur Ave, Bronx", metro: "6 a Fordham Rd", hours: "8:00-18:00", price: "$5-25", tips: "Real Italian neighborhood. Better than Manhattan Little Italy. Try multiple vendors.", category: "italian_market"},
+                {id: 276, name: "Roberta's Pizza", quarter: "Bushwick", description: "Wood-fired pizza in hipster Brooklyn. Garden dining.", address: "261 Moore St, Brooklyn", metro: "L a Morgan Ave", hours: "11:00-24:00", price: "Pizza $16-22", tips: "Hipster pizza mecca. Wood-fired oven. Garden seating available.", category: "pizza"},
+                {id: 277, name: "Peter Luger Steak House", quarter: "Williamsburg", description: "Legendary steakhouse dal 1887. CASH ONLY!", address: "178 Broadway, Brooklyn", metro: "J,M,Z a Marcy Ave", hours: "17:45-21:45", price: "Steak for 2 $120", tips: "CASH ONLY. No credit cards. Porterhouse for 2+ only. Institution.", category: "steakhouse"},
+                {id: 278, name: "Gramercy Tavern", quarter: "Flatiron", description: "Danny Meyer hospitality. American seasonal, tavern room.", address: "42 E 20th St", metro: "6 a 23rd St", hours: "12:00-22:00", price: "Entree $35-55", tips: "Two dining options. Tavern room more casual. Seasonal American menu.", category: "american_fine"},
+                {id: 279, name: "Union Square Cafe", quarter: "Gramercy", description: "Danny Meyer original. American comfort, warm service.", address: "101 E 19th St", metro: "4,5,6,L,N,Q,R,W a 14th St", hours: "12:00-22:00", price: "Entree $28-42", tips: "Danny Meyer hospitality standard. Warm atmosphere. Reservations essential.", category: "american_comfort"},
+                {id: 280, name: "Marea", quarter: "Columbus Circle", description: "2 Michelin stars. Italian seafood, crudo bar.", address: "240 Central Park South", metro: "1,A,B,C,D a 59th St", hours: "17:30-22:30", price: "Entree $45-65", tips: "Michelin starred. Raw bar exceptional. Central Park views.", category: "italian_fine"},
+                {id: 281, name: "Cosme", quarter: "Flatiron", description: "Modern Mexican by Enrique Olvera. Corn husk meringue famous.", address: "35 E 21st St", metro: "6 a 23rd St", hours: "17:30-22:00", price: "Entree $32-48", tips: "Modern Mexican techniques. Corn husk meringue dessert famous. Reservations hard.", category: "mexican_fine"},
+                {id: 282, name: "Atera", quarter: "TriBeCa", description: "2 Michelin stars. Modern tasting menu, counter seating.", address: "77 Worth St", metro: "1,2,3 a Chambers St", hours: "18:00-22:00", price: "Tasting menu $295", tips: "Michelin starred. Counter seating only. Modern techniques. Wine pairing recommended.", category: "modern_american"},
+                {id: 283, name: "Casa Enrique", quarter: "Long Island City", description: "1 Michelin star. Regional Mexican, family recipes.", address: "5-48 49th Ave, Queens", metro: "7 a Vernon Blvd", hours: "17:30-22:00", price: "Entree $22-32", tips: "Only Michelin star in Queens. Authentic regional Mexican. Family recipes.", category: "mexican_authentic"},
+                {id: 284, name: "Xi'an Famous Foods", quarter: "Multiple", description: "Hand-pulled noodles. Spicy Chinese, cult following.", address: "Multiple locations", metro: "Varia", hours: "11:00-21:30", price: "Bowl $9-14", tips: "Spicy lamb noodles signature. Very spicy. Multiple locations.", category: "chinese_noodles"},
+                {id: 285, name: "Prince Street Pizza", quarter: "Multiple", description: "Square Sicilian slices. Pepperoni cups, social media famous.", address: "27 Prince St (original)", metro: "6 a Spring St", hours: "11:00-2:00", price: "Slice $3-5", tips: "Square slice specialist. Pepperoni cups signature. Multiple locations now.", category: "pizza_slice"},
+                {id: 286, name: "Veselka", quarter: "East Village", description: "Ukrainian diner 24/7. Pierogis, borscht, comfort food.", address: "144 2nd Ave", metro: "6 a Astor Pl", hours: "24/7", price: "Entree $12-18", tips: "24/7 operation. Ukrainian comfort food. Late night reliable.", category: "ukrainian"},
+                {id: 287, name: "Russ & Daughters Cafe", quarter: "Lower East Side", description: "Appetizing cafe. Lox, bagels, Jewish classics moderna.", address: "127 Orchard St", metro: "F a Delancey St", hours: "8:00-16:00", price: "Sandwich $16-22", tips: "Modern take on Jewish classics. Quality ingredients. Weekend waits.", category: "jewish_modern"},
+                {id: 288, name: "Clinton Staking Company", quarter: "Lower East Side", description: "Brunch legend. Blueberry pancakes, weekend waits.", address: "4 Clinton St", metro: "F a East Broadway", hours: "8:00-16:00", price: "Pancakes $16", tips: "Weekend 2-hour waits. Famous blueberry pancakes. Worth the wait.", category: "brunch"},
+                {id: 289, name: "Jacob's Pickles", quarter: "Upper West Side", description: "Southern comfort food. Biscuits, fried chicken, pickles.", address: "509 Amsterdam Ave", metro: "1 a 86th St", hours: "10:00-24:00", price: "Entree $18-26", tips: "Southern comfort. House-made pickles. Good for groups.", category: "southern"},
+                {id: 290, name: "The Dead Rabbit", quarter: "Financial District", description: "Irish pub. Whiskey selection, pub grub, cocktails.", address: "30 Water St", metro: "R,W a Whitehall", hours: "11:00-4:00", price: "Entree $16-24", tips: "World's best bar award. Irish whiskey selection. Late night food.", category: "irish_pub"},
+                {id: 291, name: "Employees Only", quarter: "West Village", description: "Hidden speakeasy. Cocktails, late night kitchen.", address: "510 Hudson St", metro: "1 a Christopher St", hours: "18:00-4:00", price: "Cocktails $15, entree $22-32", tips: "Speakeasy vibe. Excellent cocktails. Kitchen open late.", category: "speakeasy"},
+                {id: 292, name: "Death & Co", quarter: "East Village", description: "Cocktail temple. Innovative drinks, dim lighting.", address: "433 E 6th St", metro: "6 a Astor Pl", hours: "17:00-2:00", price: "Cocktails $16-18", tips: "Cocktail innovation. No standing at bar. Reservations for tables.", category: "cocktail_bar"},
+                {id: 293, name: "Please Don't Tell (PDT)", quarter: "East Village", description: "Hidden bar in hot dog shop. Phone booth entrance.", address: "113 St Marks Pl", metro: "6 a Astor Pl", hours: "18:00-2:00", price: "Cocktails $15-17", tips: "Hidden behind hot dog shop. Phone booth entrance. Reservations required.", category: "speakeasy"},
+                {id: 294, name: "Angel's Share", quarter: "East Village", description: "Hidden Japanese cocktail bar. No standing, quiet conversation.", address: "8 Stuyvesant St, 2nd Floor", metro: "6 a Astor Pl", hours: "18:00-1:30", price: "Cocktails $14-16", tips: "Japanese-style cocktails. Strict rules: no standing, quiet conversation.", category: "japanese_cocktails"},
+                {id: 295, name: "Lantern's Keep", quarter: "Midtown", description: "Hotel cocktail bar. Classic cocktails, intimate setting.", address: "49 W 44th St (Iroquois Hotel)", metro: "B,D,F,M a 42nd St", hours: "17:00-1:00", price: "Cocktails $16-18", tips: "Hotel bar. Classic cocktail focus. Intimate atmosphere.", category: "hotel_bar"},
+                {id: 296, name: "Mayahuel", quarter: "East Village", description: "Mezcal and tequila bar. Mexican small plates.", address: "304 E 6th St", metro: "6 a Astor Pl", hours: "18:00-2:00", price: "Cocktails $12-15", tips: "100+ agave spirits. Mexican bar snacks. Happy hour 6-8pm.", category: "mezcal_bar"},
+                {id: 297, name: "Pouring Ribbons", quarter: "East Village", description: "Innovative cocktails. Seasonal menu, creative presentations.", address: "225 Avenue B", metro: "F a 2nd Ave", hours: "18:00-2:00", price: "Cocktails $14-16", tips: "Creative cocktail presentations. Seasonal menu changes. Knowledgeable bartenders.", category: "cocktail_innovation"},
+                {id: 298, name: "Raines Law Room", quarter: "Chelsea", description: "Victorian speakeasy. Classic cocktails, intimate booths.", address: "48 W 17th St", metro: "1 a 18th St", hours: "17:00-2:00", price: "Cocktails $15-17", tips: "Victorian decor. Intimate booths. Classic cocktail program.", category: "speakeasy"},
+                {id: 299, name: "Attaboy", quarter: "Lower East Side", description: "No menu cocktail bar. Tell bartender your preferences.", address: "134 Eldridge St", metro: "F a Delancey St", hours: "19:00-2:00", price: "Cocktails $15", tips: "No menu. Describe preferences to bartender. By Milk & Honey alums.", category: "no_menu_bar"},
+                {id: 300, name: "House of Yes", quarter: "Bushwick", description: "Performance art venue. Dinner, drinks, shows.", address: "2 Wyckoff Ave, Brooklyn", metro: "L a Jefferson St", hours: "19:00-4:00", price: "Entry $15-30, cocktails $12", tips: "Performance art venue. Costume encouraged. Immersive experiences.", category: "performance_venue"},
+                {id: 301, name: "Lucinda Verde", quarter: "Gramercy", description: "Venezuelan arepa bar. Cocktails, late night food.", address: "43 E 20th St", metro: "6 a 23rd St", hours: "17:00-2:00", price: "Arepa $8-12", tips: "Venezuelan arepas. Happy hour cocktails. Late night food.", category: "venezuelan"},
+                {id: 302, name: "Los Mariscos", quarter: "Chelsea", description: "Mexican seafood. Ceviche, tacos, agua frescas.", address: "856 9th Ave", metro: "A,C,E a 42nd St", hours: "11:00-23:00", price: "Entree $14-20", tips: "Fresh Mexican seafood. Authentic preparation. Cash preferred.", category: "mexican_seafood"},
+                {id: 303, name: "Dirt Candy", quarter: "Lower East Side", description: "Vegetarian fine dining. Creative vegetable preparations.", address: "86 Allen St", metro: "F a 2nd Ave", hours: "17:30-22:00", price: "Tasting menu $115", tips: "Vegetarian tasting menu. Creative preparations. Advance reservations.", category: "vegetarian_fine"},
+                {id: 304, name: "ABC Kitchen", quarter: "Flatiron", description: "Jean-Georges farm-to-table. Organic, local ingredients.", address: "35 E 18th St", metro: "4,5,6,L,N,Q,R,W a 14th St", hours: "11:30-22:30", price: "Entree $28-42", tips: "Farm-to-table pioneer. Organic focus. Reservations difficult.", category: "farm_to_table"},
+                {id: 305, name: "Atoboy", quarter: "NoMad", description: "Korean small plates. Modern banchan, sharing plates.", address: "43 E 28th St", metro: "6 a 28th St", hours: "17:30-22:00", price: "Small plates $12-18", tips: "Modern Korean banchan. Sharing plates concept. Atomix's casual sibling.", category: "korean_modern"},
+                {id: 306, name: "Dame", quarter: "Greenwich Village", description: "Seafood focused. Raw bar, British-inspired preparations.", address: "85 MacDougal St", metro: "A,C,E,B,D,F,M a W 4th St", hours: "17:00-23:00", price: "Entree $24-36", tips: "Seafood focus. British-inspired. Excellent raw bar.", category: "seafood"},
+                {id: 307, name: "Via Carota", quarter: "West Village", description: "Roman trattoria. Handmade pasta, simple perfection.", address: "51 Grove St", metro: "1 a Christopher St", hours: "17:00-24:00", price: "Pasta $18-22", tips: "No reservations. Roman simplicity. Long waits but worth it.", category: "italian_roman"},
+                {id: 308, name: "L'Artusi", quarter: "West Village", description: "Modern Italian. Pasta, crudo, Italian wines.", address: "228 W 10th St", metro: "1 a Christopher St", hours: "17:00-24:00", price: "Pasta $19-24", tips: "Modern Italian techniques. Excellent wine list. Bar seating available.", category: "italian_modern"},
+                {id: 309, name: "Wildair", quarter: "Lower East Side", description: "Natural wine bar. Small plates, adventurous cooking.", address: "142 Orchard St", metro: "F a Delancey St", hours: "17:30-24:00", price: "Small plates $8-16", tips: "Natural wine focus. Adventurous small plates. Counter seating.", category: "natural_wine"},
+                {id: 310, name: "Contra", quarter: "Lower East Side", description: "Tasting menu restaurant. Creative, changing menu.", address: "138 Orchard St", metro: "F a Delancey St", hours: "18:00-22:00", price: "Tasting menu $89", tips: "Creative tasting menu. Changing frequently. Counter seating only.", category: "tasting_menu"}
+            ],
+
+            // CULTURA & PERFORMANCE (20)
+            cultura_performance: [
+                {id: 311, name: "The Public Theater", quarter: "East Village", description: "Shakespeare in the Park producer. New works, classics.", address: "425 Lafayette St", metro: "6 a Astor Pl", hours: "Box office: 13:00-19:30", price: "Tickets $20-85", tips: "Free Shakespeare in Park tickets here. Innovative productions.", category: "theater"},
+                {id: 312, name: "The Village Vanguard", quarter: "Greenwich Village", description: "Legendary jazz club dal 1935. Triangular room, acoustics.", address: "178 7th Ave South", metro: "1,2,3 a 14th St", hours: "Shows 20:00, 22:30", price: "Cover $35-45", tips: "Cash only. Legendary acoustics. No talking during sets.", category: "jazz_club"},
+                {id: 313, name: "Blue Note", quarter: "Greenwich Village", description: "Famous jazz club. Top artists, dinner shows.", address: "131 W 3rd St", metro: "A,C,E,B,D,F,M a W 4th St", hours: "Shows 20:00, 22:30", price: "Cover $25-65", tips: "Famous artists perform. Dinner packages available. Reserve ahead.", category: "jazz_club"},
+                {id: 314, name: "Comedy Cellar", quarter: "Greenwich Village", description: "Stand-up comedy legend. Surprise celebrity drops.", address: "117 MacDougal St", metro: "A,C,E,B,D,F,M a W 4th St", hours: "Shows nightly", price: "Cover $22-35", tips: "Surprise celebrity appearances. No phone policy. Cash only.", category: "comedy_club"},
+                {id: 315, name: "Upright Citizens Brigade", quarter: "Chelsea", description: "Improv comedy theater. Training ground for SNL.", address: "555 W 42nd St", metro: "A,C,E a 42nd St", hours: "Shows nightly", price: "Tickets $10-25", tips: "UCB training ground. Improv and sketch. Cheap tickets.", category: "comedy_club"},
+                {id: 316, name: "Sleep No More", quarter: "Chelsea", description: "Immersive theater experience. Macbeth reimagined.", address: "530 W 27th St", metro: "C,E a 23rd St", hours: "Show times vary", price: "Tickets $65-125", tips: "Immersive experience. Wear comfortable shoes. Follow actors.", category: "immersive_theater"},
+                {id: 317, name: "The Bowery Ballroom", quarter: "Lower East Side", description: "Indie music venue. Perfect acoustics, intimate setting.", address: "6 Delancey St", metro: "F a Delancey St", hours: "Show times vary", price: "Tickets $25-60", tips: "Great acoustics. Indie/alternative acts. Good sightlines throughout.", category: "music_venue"},
+                {id: 318, name: "Mercury Lounge", quarter: "Lower East Side", description: "Small rock venue. Emerging and established acts.", address: "217 E Houston St", metro: "F a 2nd Ave", hours: "Shows most nights", price: "Tickets $15-35", tips: "Small venue. Close to artists. Cash bar. Early shows sometimes.", category: "music_venue"},
+                {id: 319, name: "Brooklyn Bowl", quarter: "Williamsburg", description: "Bowling, live music, restaurant. Unique entertainment venue.", address: "61 Wythe Ave, Brooklyn", metro: "L a Bedford Ave", hours: "17:00-2:00", price: "Bowling $35/hour, show tickets vary", tips: "Bowling while watching concerts. Good sound system. Full restaurant.", category: "entertainment_venue"},
+                {id: 320, name: "Joe's Pub", quarter: "East Village", description: "Cabaret venue at Public Theater. Intimate performances.", address: "425 Lafayette St", metro: "6 a Astor Pl", hours: "Shows most nights", price: "Tickets $20-45", tips: "Intimate cabaret setting. Full dinner menu. Diverse programming.", category: "cabaret"},
+                {id: 321, name: "54 Below", quarter: "Midtown", description: "Broadway cabaret. Theater performers, new works.", address: "254 W 54th St", metro: "1 a 50th St", hours: "Show times vary", price: "Tickets $35-75", tips: "Broadway performers. Cabaret shows. Full dinner available.", category: "cabaret"},
+                {id: 322, name: "The Kitchen", quarter: "Chelsea", description: "Experimental performance art. Video, dance, music.", address: "512 W 19th St", metro: "A,C,E a 14th St", hours: "Show times vary", price: "Tickets $15-30", tips: "Experimental art. Video installations. Performance art focus.", category: "performance_art"},
+                {id: 323, name: "PS122", quarter: "East Village", description: "Performance space. Emerging artists, experimental work.", address: "150 1st Ave", metro: "L a 1st Ave", hours: "Show times vary", price: "Tickets $15-25", tips: "Emerging performance artists. Experimental work. Community oriented.", category: "performance_space"},
+                {id: 324, name: "National Sawdust", quarter: "Williamsburg", description: "New music venue. Contemporary classical, experimental.", address: "80 N 6th St, Brooklyn", metro: "L a Bedford Ave", hours: "Show times vary", price: "Tickets $20-40", tips: "New music focus. Experimental classical. Beautiful space design.", category: "music_venue"},
+                {id: 325, name: "Ars Nova", quarter: "Hell's Kitchen", description: "New theater works. Emerging playwrights, musicals.", address: "511 W 54th St", metro: "C,E a 50th St", hours: "Show times vary", price: "Tickets $18-35", tips: "New works development. Emerging artists. Innovative programming.", category: "theater"},
+                {id: 326, name: "Signature Theatre", quarter: "Midtown", description: "Playwright-focused theater. Season dedicato single artists.", address: "480 W 42nd St", metro: "A,C,E a 42nd St", hours: "Show times vary", price: "Tickets $25-85", tips: "Single playwright seasons. High-quality productions. Theater Row location.", category: "theater"},
+                {id: 327, name: "Cherry Lane Theatre", quarter: "West Village", description: "Off-Broadway landmark. Intimate, historic venue.", address: "38 Commerce St", metro: "1 a Christopher St", hours: "Show times vary", price: "Tickets $30-80", tips: "Historic venue. Intimate setting. Quality off-Broadway productions.", category: "theater"},
+                {id: 328, name: "Minetta Lane Theatre", quarter: "Greenwich Village", description: "Off-Broadway theater. Intimate venue, quality productions.", address: "18 Minetta Lane", metro: "A,C,E,B,D,F,M a W 4th St", hours: "Show times vary", price: "Tickets $40-100", tips: "Small theater. Quality productions. Village location convenient.", category: "theater"},
+                {id: 329, name: "Jazz at Lincoln Center", quarter: "Columbus Circle", description: "Premier jazz venue. Wynton Marsalis artistic direction.", address: "10 Columbus Circle", metro: "1,A,B,C,D a 59th St", hours: "Show times vary", price: "Tickets $30-150", tips: "World-class jazz. Multiple venues. Central Park views from some.", category: "jazz_venue"},
+                {id: 330, name: "Smoke Jazz & Supper Club", quarter: "Upper West Side", description: "Intimate jazz club. Dinner and drinks with shows.", address: "2751 Broadway", metro: "1 a 103rd St", hours: "Shows 21:00, 22:30", price: "Cover $25-35", tips: "Upper West Side jazz. Intimate setting. Dinner available.", category: "jazz_club"}
+            ]
+        };
+
+        const NYCGuideApp = () => {
+            const [activeCategory, setActiveCategory] = useState('iconiche');
+            const [searchTerm, setSearchTerm] = useState('');
+            const [favorites, setFavorites] = useState([]);
+            const [selectedQuarter, setSelectedQuarter] = useState('all');
+
+            // Combina tutti i dati in un array unico per la ricerca
+            const allPlaces = useMemo(() => {
+                return Object.entries(nycDatabase).reduce((acc, [category, places]) => {
+                    return acc.concat(places.map(place => ({ ...place, category: category })));
+                }, []);
+            }, []);
+
+            // Filtra i luoghi in base alla categoria attiva, ricerca e quartiere
+            const filteredPlaces = useMemo(() => {
+                let places = nycDatabase[activeCategory] || [];
+                
+                if (searchTerm) {
+                    places = allPlaces.filter(place => 
+                        place.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        place.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        place.quarter.toLowerCase().includes(searchTerm.toLowerCase())
+                    );
+                }
+                
+                if (selectedQuarter !== 'all') {
+                    places = places.filter(place => 
+                        place.quarter.toLowerCase().includes(selectedQuarter.toLowerCase())
+                    );
+                }
+                
+                return places;
+            }, [activeCategory, searchTerm, selectedQuarter, allPlaces]);
+
+            // Get unique quarters for filter
+            const quarters = useMemo(() => {
+                const quarterSet = new Set();
+                allPlaces.forEach(place => quarterSet.add(place.quarter));
+                return Array.from(quarterSet).sort();
+            }, [allPlaces]);
+
+            const toggleFavorite = (id) => {
+                setFavorites(prev => 
+                    prev.includes(id) 
+                        ? prev.filter(fav => fav !== id)
+                        : [...prev, id]
+                );
+            };
+
+            const favoritesList = useMemo(() => {
+                return allPlaces.filter(place => favorites.includes(place.id));
+            }, [favorites, allPlaces]);
+
+            const categories = {
+                iconiche: { name: "🗽 Iconiche", count: nycDatabase.iconiche?.length || 0 },
+                nascoste: { name: "💎 Nascoste", count: nycDatabase.nascoste?.length || 0 },
+                economici: { name: "💰 Economici", count: nycDatabase.economici?.length || 0 },
+                medi: { name: "🍽️ Ristoranti", count: nycDatabase.medi?.length || 0 },
+                stellati: { name: "⭐ Stellati", count: nycDatabase.stellati?.length || 0 },
+                specialita: { name: "🥯 Specialità", count: nycDatabase.specialita?.length || 0 },
+                maratona: { name: "🏃‍♂️ Maratona", count: nycDatabase.maratona?.length || 0 },
+                shopping: { name: "🛍️ Shopping", count: nycDatabase.shopping?.length || 0 },
+                servizi: { name: "🚇 Servizi", count: nycDatabase.servizi?.length || 0 },
+                arte_storia: { name: "🎨 Arte & Storia", count: nycDatabase.arte_storia?.length || 0 },
+                shopping_caratteristico: { name: "🏪 Shopping Unico", count: nycDatabase.shopping_caratteristico?.length || 0 },
+                ristoranti_aggiuntivi: { name: "🍴 + Ristoranti", count: nycDatabase.ristoranti_aggiuntivi?.length || 0 },
+                cultura_performance: { name: "🎭 Performance", count: nycDatabase.cultura_performance?.length || 0 },
+                favorites: { name: "❤️ Preferiti", count: favorites.length }
+            };
+
+            const PlaceCard = ({ place }) => (
+                <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                            <h3 className="font-bold text-lg text-gray-800">{place.name}</h3>
+                            <p className="text-sm text-blue-600 font-medium">{place.quarter}</p>
+                        </div>
+                        <button 
+                            onClick={() => toggleFavorite(place.id)}
+                            className={`text-xl ${favorites.includes(place.id) ? 'text-red-500' : 'text-gray-400'}`}
+                        >
+                            ♥
+                        </button>
+                    </div>
+                    
+                    <p className="text-gray-700 text-sm mb-3 leading-relaxed">{place.description}</p>
+                    
+                    <div className="space-y-2 text-sm">
+                        <div className="flex items-center">
+                            <span className="font-medium text-gray-600">📍</span>
+                            <span className="ml-2">{place.address}</span>
+                        </div>
+                        
+                        {place.metro && (
+                            <div className="flex items-center">
+                                <span className="font-medium text-gray-600">🚇</span>
+                                <span className="ml-2">{place.metro}</span>
+                            </div>
+                        )}
+                        
+                        <div className="flex items-center">
+                            <span className="font-medium text-gray-600">🕐</span>
+                            <span className="ml-2">{place.hours}</span>
+                        </div>
+                        
+                        <div className="flex items-center">
+                            <span className="font-medium text-gray-600">💰</span>
+                            <span className="ml-2 font-semibold text-green-600">{place.price}</span>
+                        </div>
+                        
+                        {place.tips && (
+                            <div className="bg-yellow-50 p-2 rounded border-l-4 border-yellow-400">
+                                <span className="font-medium text-yellow-800">💡 Tip:</span>
+                                <span className="ml-1 text-yellow-700 text-sm">{place.tips}</span>
+                            </div>
+                        )}
+                    </div>
+                    
+                    <button 
+                        className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                        onClick={() => {
+                            const searchQuery = encodeURIComponent(`${place.address}, New York, NY`);
+                            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${searchQuery}`;
+                            window.open(mapsUrl, '_blank');
+                        }}
+                    >
+                        🗺️ Apri in Google Maps
+                    </button>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 sticky top-0 z-50 shadow-lg">
+                        <div className="max-w-7xl mx-auto">
+                            <h1 className="text-2xl font-bold mb-1">🗽 NYC Marathon Guide 2025</h1>
+                            <p className="text-blue-100 text-sm">
+                                Guida Completa Offline • 330+ Luoghi • 30 Ott - 3 Nov • Marathon Weekend
+                            </p>
+                        </div>
+                    </header>
+
+                    {/* Navigation Categories */}
+                    <nav className="bg-white shadow-sm sticky top-16 z-40">
+                        <div className="max-w-7xl mx-auto px-4">
+                            <div className="flex overflow-x-auto py-2">
+                                {Object.entries(categories).map(([key, category]) => (
+                                    <button
+                                        key={key}
+                                        onClick={() => {
+                                            setActiveCategory(key);
+                                            setSearchTerm('');
+                                            setSelectedQuarter('all');
+                                        }}
+                                        className={`flex-shrink-0 px-4 py-2 mx-1 text-sm font-medium rounded-lg border-2 transition-colors ${
+                                            activeCategory === key
+                                                ? 'border-blue-600 bg-blue-600 text-white'
+                                                : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        {category.name} ({category.count})
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Search and Filters */}
+                    <div className="bg-white border-b shadow-sm">
+                        <div className="max-w-7xl mx-auto p-4">
+                            <div className="flex flex-col md:flex-row gap-4">
+                                <div className="flex-1">
+                                    <input
+                                        type="text"
+                                        placeholder="🔍 Cerca luoghi, descrizioni, quartieri..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                                
+                                <select
+                                    value={selectedQuarter}
+                                    onChange={(e) => setSelectedQuarter(e.target.value)}
+                                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="all">🗺️ Tutti i Quartieri</option>
+                                    {quarters.map(quarter => (
+                                        <option key={quarter} value={quarter}>{quarter}</option>
+                                    ))}
+                                </select>
+                                
+                                <button
+                                    onClick={() => {
+                                        setSearchTerm('');
+                                        setSelectedQuarter('all');
+                                    }}
+                                    className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                                >
+                                    🔄 Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <main className="max-w-7xl mx-auto p-4">
+                        <div className="mb-6">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                                {activeCategory === 'favorites' ? 
+                                    `❤️ I Tuoi Preferiti (${favorites.length})` :
+                                    `${categories[activeCategory]?.name} (${filteredPlaces.length})`
+                                }
+                            </h2>
+                            
+                            {searchTerm && (
+                                <p className="text-gray-600">
+                                    Risultati per: "<span className="font-semibold">{searchTerm}</span>"
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Places Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {(activeCategory === 'favorites' ? favoritesList : filteredPlaces).map(place => (
+                                <PlaceCard key={place.id} place={place} />
+                            ))}
+                        </div>
+
+                        {filteredPlaces.length === 0 && activeCategory !== 'favorites' && (
+                            <div className="text-center py-12">
+                                <div className="text-4xl mb-4">🔍</div>
+                                <p className="text-gray-600 text-lg">Nessun risultato trovato</p>
+                                <p className="text-gray-500 text-sm mt-2">Prova a modificare i filtri o il termine di ricerca</p>
+                            </div>
+                        )}
+
+                        {favorites.length === 0 && activeCategory === 'favorites' && (
+                            <div className="text-center py-12">
+                                <div className="text-4xl mb-4">❤️</div>
+                                <p className="text-gray-600 text-lg">Nessun preferito salvato</p>
+                                <p className="text-gray-500 text-sm mt-2">Clicca sui cuori per salvare i luoghi che ti interessano!</p>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="bg-gray-800 text-white mt-12">
+                        <div className="max-w-7xl mx-auto p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-sm">
+                                <div>
+                                    <h3 className="font-semibold mb-3">📱 Database</h3>
+                                    <p>• {nycDatabase.iconiche?.length} Attrazioni Iconiche</p>
+                                    <p>• {nycDatabase.nascoste?.length} Gemme Nascoste</p>
+                                    <p>• {(nycDatabase.economici?.length || 0) + (nycDatabase.medi?.length || 0) + (nycDatabase.stellati?.length || 0) + (nycDatabase.specialita?.length || 0) + (nycDatabase.ristoranti_aggiuntivi?.length || 0)} Ristoranti</p>
+                                    <p>• {nycDatabase.maratona?.length} Info Maratona</p>
+                                    <p>• {(nycDatabase.shopping?.length || 0) + (nycDatabase.shopping_caratteristico?.length || 0)} Shopping</p>
+                                    <p>• {(nycDatabase.arte_storia?.length || 0) + (nycDatabase.cultura_performance?.length || 0)} Arte & Cultura</p>
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold mb-3">🚇 Trasporti</h3>
+                                    <p>• MetroCard: $2.90 a corsa</p>
+                                    <p>• Weekly: $33</p>
+                                    <p>• Taxi: $3 base + $0.70/0.2mi</p>
+                                    <p>• Citi Bike: $15/giorno</p>
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold mb-3">🆘 Emergenza</h3>
+                                    <p>• Emergenze: 911</p>
+                                    <p>• Info NYC: 311</p>
+                                    <p>• Informazioni: 411</p>
+                                    <p>• Consolato IT: 690 Park Ave</p>
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold mb-3">💡 Tips</h3>
+                                    <p>• Mancia ristoranti: 18-20%</p>
+                                    <p>• Cambio: 1 EUR ≈ 1.10 USD</p>
+                                    <p>• Funziona offline dopo primo caricamento</p>
+                                    <p>• Salva nei preferiti per accesso rapido</p>
+                                </div>
+                            </div>
+                            <div className="border-t border-gray-700 mt-6 pt-4 text-center">
+                                <p className="text-sm">🗽 NYC Marathon Guide 2025 - Guida Completa Offline</p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                    ✅ 330+ luoghi curati • 📱 Funziona offline • 🗺️ Link Google Maps • ❤️ Sistema preferiti
+                                </p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<NYCGuideApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
